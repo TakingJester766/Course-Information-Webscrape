@@ -8,6 +8,8 @@ from selenium import webdriver
 from subprocess import CREATE_NO_WINDOW
 from selenium.webdriver.common.by import By
 import time
+import smtplib
+from email.message import EmailMessage
 
 from selenium.webdriver.support.select import Select
 

@@ -1,0 +1,3 @@
+[Config]
+login = arzimmerman
+password = vitjoZ-1pisda-muzsyz
