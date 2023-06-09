@@ -73,18 +73,37 @@ def main(time=time):
     time.sleep(3)
 
     #navigate to search add enroll button
-    search_add_enroll_btn = driver.find_element(by=By.ID, value="win49divSCC_LO_FL_WRK_SCC_GROUP_BOX_1$21$$11")
+    search_add_enroll_btn = driver.find_element(by=By.ID, value="SCC_LO_FL_WRK_SCC_VIEW_BTN$24$$11")
     ActionChains(driver)\
         .click(search_add_enroll_btn)\
         .perform()
     time.sleep(3)
 
-    #additional ways to search btn
-    additional_ways_to_search_btn = driver.find_element(by=By.ID, value="SSR_CLSRCH_FLDS_PTS_ADV_SRCH")
+    #select relevant school term
+    fall_semester = driver.find_element(by=By.ID, value="SSR_CSTRMCUR_VW_DESCR$1")
     ActionChains(driver)\
-        .click(additional_ways_to_search_btn)\
+        .click(fall_semester)\
         .perform()
     time.sleep(3)
 
+    #select additional ways to search button
+    additional_ways_to_search = driver.find_element(by=By.ID, value="SSR_CLSRCH_FLDS_PTS_ADV_SRCH")
+    ActionChains(driver)\
+        .click(additional_ways_to_search)\
+        .perform()
+    time.sleep(3)
+
+    #select_course
+    accounting = driver.find_element(by=By.ID, value="ACCOUNTG")
+    ActionChains(driver)\
+        .click(accounting)\
+        .perform()
+    time.sleep(3)
+
+    
+
+
 
 main()
+
+
