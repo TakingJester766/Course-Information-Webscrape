@@ -8,6 +8,7 @@ from selenium import webdriver
 from subprocess import CREATE_NO_WINDOW
 from selenium.webdriver.common.by import By
 import time
+from selenium.common.exceptions import NoSuchElementException
 
 from selenium.webdriver.support.select import Select
 
@@ -56,7 +57,37 @@ def getCourseInformation(row):
     
     course_info = CourseInformation(courseId.text, meetingDays.text, instructor.text)
     return course_info
-    
+
+from selenium.common.exceptions import NoSuchElementException
+
+def loopCourses():
+    numCourses = int(getNumCourses())
+    numRows = getNumRows()
+    for i in range(0, numCourses):
+        try:
+            course_to_click = driver.find_element(by=By.ID, value="PTS_LIST_TITLE$" + str(i))
+        except NoSuchElementException:
+            print("Element not found. Incrementing i by 1.")
+            i += 1
+            if i >= numCourses:
+                print("No more courses to click. Exiting loop.")
+                break
+            continue
+
+        ActionChains(driver).click(course_to_click).perform()
+        time.sleep(3)
+
+        for j in range(0, numRows):
+            courseInfo = getCourseInformation(j)
+            print(courseInfo.courseId)
+            print(courseInfo.meetingDays)
+            print(courseInfo.instructor)
+
+        time.sleep(3)
+        driver.back()
+        time.sleep(3)
+
+
 
 def main(time=time):    
     # log into spire using driver
@@ -133,22 +164,9 @@ def main(time=time):
 
     time.sleep(3)
 
-    result = getNumCourses()
-    print(result)
+    loopCourses()
 
-    hardcoded_course = driver.find_element(by=By.ID, value="PTS_LIST_TITLE$3")
-    ActionChains(driver)\
-        .click(hardcoded_course)\
-        .perform()
     
-    time.sleep(4)
-
-    numRows = getNumRows()
-    for i in range(0, numRows):
-        courseInfo = getCourseInformation(i)
-        print(courseInfo.courseId)
-        print(courseInfo.meetingDays)
-        print(courseInfo.instructor)
 
     
         
