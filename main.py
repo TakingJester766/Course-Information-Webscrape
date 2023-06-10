@@ -56,14 +56,7 @@ def main(time=time):
     time.sleep(3)
 
     #redirect to room selection page
-    #driver.get("https://www.spire.umass.edu/psc/heproda_newwin/EMPLOYEE/SA/c/UM_H_SELF_SERVICE_FL.UM_H_SS_RMSELHM_FL.GBL?NavColl=true")
-
-    #click on semester
-    semester = driver.find_element(by=By.ID, value="SSR_ENTRMCUR_VW_ACAD_CAREER_DESCR$1")
-    ActionChains(driver)\
-        .click(semester)\
-        .perform()
-    time.sleep(3)
+    #driver.get("https://www.spire.umass.edu/psc/heproda_newwin/EMPLOYEE/SA/c/UM_H_SELF_SERVICE_FL.UM_H_SS_RMSELHM_FL.GBL?NavColl=true")    
 
     #switch to add drop edit dropdown
     add_drop_edit_btn = driver.find_element(by=By.ID, value="SCC_LO_FL_WRK_SCC_VIEW_BTN$IMG$2")
@@ -91,19 +84,34 @@ def main(time=time):
     ActionChains(driver)\
         .click(additional_ways_to_search)\
         .perform()
-    time.sleep(3)
+    time.sleep(4)
 
-    #select_course
-    accounting = driver.find_element(by=By.ID, value="ACCOUNTG")
+    #switch to search iframe
+    driver.switch_to.frame(driver.find_element(by=By.ID, value="ptModFrame_0"))
+
+    #open dropdown menu
+    dropdown = driver.find_element(by=By.ID, value="SSR_CLSRCH_ADV_SSR_ADVSRCH_OP2$0")
+    select = Select(dropdown)
+    select.select_by_visible_text("Accounting")
+
+    #click search button
+    search_btn = driver.find_element(by=By.ID, value="SSR_CLSRCH_FLDS_SSR_SEARCH_PB_1$0")
     ActionChains(driver)\
-        .click(accounting)\
+        .click(search_btn)\
         .perform()
-    time.sleep(3)
+    
+    
+
+
+    time.sleep(10)
+
 
     
 
 
 
 main()
+
+
 
 
