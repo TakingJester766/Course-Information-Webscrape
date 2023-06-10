@@ -27,6 +27,30 @@ if spire_pass == '' or spire_log == '' or search_start == '':
     os.system("pause")
     sys.exit()
 
+
+#to have getCourseInformation return an object
+class CourseInformation:
+    def __init__(self, courseId, meetingDays, instructor):
+        self.courseId = courseId
+        self.meetingDays = meetingDays
+        self.instructor = instructor
+
+#getting number of rows in table after clicking on specific course
+def getNumRows():
+    tbody = driver.find_element(By.TAG_NAME, 'tbody')
+    rows = tbody.find_elements(By.TAG_NAME, 'tr')
+    return len(rows)
+
+#gets course information from table
+def getCourseInformation(row):
+    courseId = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_CMPNT_DESCR_1$294$$" + str(row))
+    meetingDays = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_MTG_SCHED_L_1$134$$" + str(row))
+    instructor = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_INSTR_LONG_1$86$$" + str(row))
+    
+    course_info = CourseInformation(courseId.text, meetingDays.text, instructor.text)
+    return course_info
+    
+
 def main(time=time):    
     # log into spire using driver
     driver.get("https://www.umass.edu/it/spire")
@@ -99,12 +123,29 @@ def main(time=time):
     ActionChains(driver)\
         .click(search_btn)\
         .perform()
+
+    time.sleep(3)
+
+    hardcoded_course = driver.find_element(by=By.ID, value="PTS_LIST_TITLE$3")
+    ActionChains(driver)\
+        .click(hardcoded_course)\
+        .perform()
     
+    time.sleep(4)
+
+    numRows = getNumRows()
+    for i in range(0, numRows):
+        courseInfo = getCourseInformation(i)
+        print(courseInfo.courseId)
+        print(courseInfo.meetingDays)
+        print(courseInfo.instructor)
+
+
     
 
+    
 
-    time.sleep(10)
-
+#tbody class="ps_grid-body"
 
     
 
