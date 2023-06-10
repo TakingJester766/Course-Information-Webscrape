@@ -41,6 +41,13 @@ def getNumRows():
     rows = tbody.find_elements(By.TAG_NAME, 'tr')
     return len(rows)
 
+#get number of li in elements ul from a given subject
+def getNumCourses():
+    b_parent = driver.find_element(By.CLASS_NAME, "ps-htmlarea")
+    b = b_parent.find_element(By.TAG_NAME, "b")
+    return b.text
+    
+
 #gets course information from table
 def getCourseInformation(row):
     courseId = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_CMPNT_DESCR_1$294$$" + str(row))
@@ -126,6 +133,9 @@ def main(time=time):
 
     time.sleep(3)
 
+    result = getNumCourses()
+    print(result)
+
     hardcoded_course = driver.find_element(by=By.ID, value="PTS_LIST_TITLE$3")
     ActionChains(driver)\
         .click(hardcoded_course)\
@@ -140,6 +150,8 @@ def main(time=time):
         print(courseInfo.meetingDays)
         print(courseInfo.instructor)
 
+    
+        
 
     
 
