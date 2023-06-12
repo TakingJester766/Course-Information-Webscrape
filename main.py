@@ -31,7 +31,8 @@ if spire_pass == '' or spire_log == '' or search_start == '':
 
 #to have getCourseInformation return an object
 class CourseInformation:
-    def __init__(self, courseId, meetingDays, instructor):
+    def __init__(self, courseTitle, courseId, meetingDays, instructor):
+        self.courseTitle = courseTitle
         self.courseId = courseId
         self.meetingDays = meetingDays
         self.instructor = instructor
@@ -46,46 +47,58 @@ def getNumRows():
 def getNumCourses():
     b_parent = driver.find_element(By.CLASS_NAME, "ps-htmlarea")
     b = b_parent.find_element(By.TAG_NAME, "b")
-    return b.text
+    return int(b.text)
     
 
 #gets course information from table
 def getCourseInformation(row):
+    courseTitle = driver.find_element(by=By.ID, value="SSR_CRSE_INFO_V_SSS_SUBJ_CATLG")
     courseId = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_CMPNT_DESCR_1$294$$" + str(row))
     meetingDays = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_MTG_SCHED_L_1$134$$" + str(row))
     instructor = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_INSTR_LONG_1$86$$" + str(row))
     
-    course_info = CourseInformation(courseId.text, meetingDays.text, instructor.text)
+    course_info = CourseInformation(courseTitle.text, courseId.text, meetingDays.text, instructor.text)
     return course_info
 
 from selenium.common.exceptions import NoSuchElementException
 
 def loopCourses():
-    numCourses = int(getNumCourses())
-    numRows = getNumRows()
-    for i in range(0, numCourses):
+    numCourses = getNumCourses()
+    print(numCourses)
+
+    i = 0
+    while i < numCourses + 1:
         try:
             course_to_click = driver.find_element(by=By.ID, value="PTS_LIST_TITLE$" + str(i))
+
+            ActionChains(driver).click(course_to_click).perform()
+            time.sleep(3)
+
+            numRows = getNumRows()  # get the fresh number of rows for the new course
+            for j in range(0, numRows):
+                courseInfo = getCourseInformation(j)
+                print(courseInfo.courseTitle)
+                print(courseInfo.courseId)
+                print(courseInfo.meetingDays)
+                print(courseInfo.instructor)
+
+            time.sleep(3)
+            driver.back()
+            time.sleep(3)
+
+            print("current i: " + str(i))
+
+            i += 1  # increment i at the end of each successful iteration
+
         except NoSuchElementException:
-            print("Element not found. Incrementing i by 1.")
+            print("Element not found. Incrementing i by 1. i currently: " + str(i))
             i += 1
+            print("i incremented to: " + str(i))
             if i >= numCourses:
                 print("No more courses to click. Exiting loop.")
                 break
             continue
 
-        ActionChains(driver).click(course_to_click).perform()
-        time.sleep(3)
-
-        for j in range(0, numRows):
-            courseInfo = getCourseInformation(j)
-            print(courseInfo.courseId)
-            print(courseInfo.meetingDays)
-            print(courseInfo.instructor)
-
-        time.sleep(3)
-        driver.back()
-        time.sleep(3)
 
 
 
