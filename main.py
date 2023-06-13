@@ -66,8 +66,10 @@ def loopCourses():
     numCourses = getNumCourses()
     print(numCourses)
 
+    foundCourses = 0
+
     i = 0
-    while i < numCourses + 1:
+    while foundCourses < numCourses:
         try:
             course_to_click = driver.find_element(by=By.ID, value="PTS_LIST_TITLE$" + str(i))
 
@@ -88,6 +90,7 @@ def loopCourses():
 
             print("current i: " + str(i))
 
+            foundCourses += 1  # increment foundCourses at the end of each successful iteration
             i += 1  # increment i at the end of each successful iteration
 
         except NoSuchElementException:
