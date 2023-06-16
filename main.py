@@ -12,6 +12,8 @@ from selenium.common.exceptions import NoSuchElementException
 
 from selenium.webdriver.support.select import Select
 
+from subjects_array import subjectArr
+
 config = configparser.ConfigParser()
 config.read_file(open(r'config.txt'))
 spire_log = config.get('Config', 'login')
@@ -62,6 +64,39 @@ def getCourseInformation(row):
 
 from selenium.common.exceptions import NoSuchElementException
 
+#loop through subjects
+def loopSubjects(subjectsArr):
+
+    
+    
+        
+    for subject in subjectsArr:
+
+        #select additional ways to search button
+        additional_ways_to_search = driver.find_element(by=By.ID, value="SSR_CLSRCH_FLDS_PTS_ADV_SRCH")
+        ActionChains(driver)\
+            .click(additional_ways_to_search)\
+            .perform()
+        time.sleep(4)
+
+        driver.switch_to.frame(driver.find_element(by=By.ID, value="ptModFrame_0"))
+
+        dropdown = driver.find_element(by=By.ID, value="SSR_CLSRCH_ADV_SSR_ADVSRCH_OP2$0")
+        select = Select(dropdown)
+        print(subject)
+        select.select_by_visible_text(subject)
+
+        search_btn = driver.find_element(by=By.ID, value="SSR_CLSRCH_FLDS_SSR_SEARCH_PB_1$0")
+        ActionChains(driver)\
+            .click(search_btn)\
+            .perform()
+           
+        time.sleep(3)
+
+        loopCourses()
+
+        time.sleep(3)
+
 def loopCourses():
     numCourses = getNumCourses()
     print(numCourses)
@@ -101,6 +136,16 @@ def loopCourses():
                 print("No more courses to click. Exiting loop.")
                 break
             continue
+
+        #if all courses found, click this id: PT_WORK_PT_BUTTON_BACK
+        if foundCourses == numCourses:
+            back_btn = driver.find_element(by=By.ID, value="PT_WORK_PT_BUTTON_BACK")
+            ActionChains(driver).click(back_btn).perform()
+            time.sleep(3)
+            break
+
+
+
 
 
 
@@ -157,30 +202,23 @@ def main(time=time):
         .perform()
     time.sleep(3)
 
-    #select additional ways to search button
-    additional_ways_to_search = driver.find_element(by=By.ID, value="SSR_CLSRCH_FLDS_PTS_ADV_SRCH")
-    ActionChains(driver)\
-        .click(additional_ways_to_search)\
-        .perform()
-    time.sleep(4)
+    
 
-    #switch to search iframe
-    driver.switch_to.frame(driver.find_element(by=By.ID, value="ptModFrame_0"))
+    
 
-    #open dropdown menu
-    dropdown = driver.find_element(by=By.ID, value="SSR_CLSRCH_ADV_SSR_ADVSRCH_OP2$0")
-    select = Select(dropdown)
-    select.select_by_visible_text("Accounting")
+    
 
-    #click search button
-    search_btn = driver.find_element(by=By.ID, value="SSR_CLSRCH_FLDS_SSR_SEARCH_PB_1$0")
-    ActionChains(driver)\
-        .click(search_btn)\
-        .perform()
+    
+    loopSubjects(subjectArr)
 
-    time.sleep(3)
 
-    loopCourses()
+            
+
+
+            
+
+            
+            
 
     
 
