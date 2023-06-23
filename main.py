@@ -32,12 +32,32 @@ if spire_pass == '' or spire_log == '' or search_start == '':
 
 
 #to have getCourseInformation return an object
-class CourseInformation:
+class LectureOnly:
     def __init__(self, courseTitle, courseId, meetingDays, instructor):
         self.courseTitle = courseTitle
         self.courseId = courseId
         self.meetingDays = meetingDays
         self.instructor = instructor
+
+#class for if lecture and lab in same course
+class LectureAndLab:
+    def __init__(self, courseTitle, courseId, meetingDays, instructor, labDays, labInstructor):
+        self.courseTitle = courseTitle
+        self.courseId = courseId
+        self.meetingDays = meetingDays
+        self.instructor = instructor
+        self.labDays = labDays
+        self.labInstructor = labInstructor
+
+#for seminar classes
+class Seminar:
+    def __init__(self, courseTitle, courseId, meetingDays, instructor, seminarDays, seminarInstructor):
+        self.courseTitle = courseTitle
+        self.courseId = courseId
+        self.meetingDays = meetingDays
+        self.instructor = instructor
+        self.seminarDays = seminarDays
+        self.seminarInstructor = seminarInstructor
 
 #getting number of rows in table after clicking on specific course
 def getNumRows():
@@ -45,23 +65,97 @@ def getNumRows():
     rows = tbody.find_elements(By.TAG_NAME, 'tr')
     return len(rows)
 
-#get number of li in elements ul from a given subject
+#get number of courses for a given subject
 def getNumCourses():
     b_parent = driver.find_element(By.CLASS_NAME, "ps-htmlarea")
     b = b_parent.find_element(By.TAG_NAME, "b")
     return int(b.text)
-    
 
-#gets course information from table
-def getCourseInformation(row):
+def checkIfLectureOnly():
+    try:
+        labDays = driver.find_element(by=By.ID, value="SSR_CLSRCH_MTG1_SCHED$0_row0")
+        return False
+    except NoSuchElementException:
+        return True
+    
+def checkIfLectureAndLab():
+    try:
+        labDays = driver.find_element(by=By.ID, value="SSR_CLSRCH_MTG1_SCHED$0_row0")
+        labInstructor = driver.find_element(by=By.ID, value="MTG_INSTR$0")
+        return True
+    except NoSuchElementException:
+        return False
+    
+def checkIfSeminar():
+    try:
+        seminarDays = driver.find_element(by=By.ID, value="SSR_CLSRCH_MTG1_SCHED$0_row0")
+        seminarInstructor = driver.find_element(by=By.ID, value="MTG_INSTR$0")
+        return True
+    except NoSuchElementException:
+        return False
+    
+def checkClassType():
+    #checks what type of class in a given course. depending on if lecture only, lecture and lab, or seminar only, returns "lectureOnly", "lectureAndLab", or "seminar"
+    #use checkIfLectureOnly, checkIfLectureAndLab, or checkIfSeminar methods
+    if (checkIfLectureAndLab()):
+        return "lectureAndLab"
+    elif (checkIfLectureOnly()):
+        return "lectureOnly"
+    else:
+        return "seminar"
+
+#get information for lecture only classes
+def getLectureOnly(row):
+    courseTitle = driver.find_element(by=By.ID, value="SSR_CRSE_INFO_VW_DESCR$0_row" + str(row))
+
     courseTitle = driver.find_element(by=By.ID, value="SSR_CRSE_INFO_V_SSS_SUBJ_CATLG")
     courseId = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_CMPNT_DESCR_1$294$$" + str(row))
     meetingDays = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_MTG_SCHED_L_1$134$$" + str(row))
     instructor = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_INSTR_LONG_1$86$$" + str(row))
     
-    course_info = CourseInformation(courseTitle.text, courseId.text, meetingDays.text, instructor.text)
+    course_info = LectureOnly(courseTitle.text, courseId.text, meetingDays.text, instructor.text)
+
     return course_info
 
+#get information for lecture and lab classes
+def getLectureAndLab(row):
+    courseTitle = driver.find_element(by=By.ID, value="SSR_CRSE_INFO_VW_DESCR$0_row" + str(row))
+    courseId = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_CMPNT_DESCR_1$294$$" + str(row))
+    meetingDays = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_MTG_SCHED_L_1$134$$" + str(row))
+    instructor = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_INSTR_LONG_1$86$$" + str(row))
+
+    labDays = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_CMPNT_DESCR_2$295$$" + str(row)) 
+    labStaff = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_INSTR_LONG_2$161$$" + str(row))
+
+    courseInfo = LectureAndLab(courseTitle.text, courseId.text, meetingDays.text, instructor.text, labDays.text, labStaff.text)
+
+    return courseInfo
+
+#get information for seminar classes
+def getSeminar(row):
+    courseTitle  = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_CMPNT_DESCR_1$294$$" + str(row))
+    courseId = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_MTG_SCHED_L_1$134$$" + str(row))
+    meetingDays = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_MTG_DT_LONG_1$88$$" + str(row))
+
+    courseInfo = Seminar(courseTitle.text, courseId.text, meetingDays.text, instructor.text  )
+
+    return courseInfo
+
+#gets course information from table
+def getCourseInformation(row):
+    
+    if checkIfLectureOnly(row):
+        course_info = getLectureOnly(row)
+        return course_info
+    elif checkIfLectureAndLab(row):
+        course_info = getLectureAndLab(row)
+        return course_info
+    elif checkIfSeminar(row):
+        course_info = getSeminar(row)
+        return course_info
+    
+    
+        
 from selenium.common.exceptions import NoSuchElementException
 
 #loop through subjects
