@@ -1,5 +1,5 @@
 # i want to export this list
-
+#removed "Accounting" for testing purposes
 subjects_array = [
 'Aerospace Studies', 'Afro-American Studies', 'Animal Science', 
 'Anthropology', 'Anthropology - @Amherst', 'Arabic', 'Architecture', 'Art', 
