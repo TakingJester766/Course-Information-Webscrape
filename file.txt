@@ -25,21 +25,6 @@ service.creationflags = CREATE_NO_WINDOW
 driver = webdriver.Chrome(service=service)
 driver.implicitly_wait(15)
 
-#example: <span class="ps_box-value" id="SSR_CRSE_INFO_V_SSS_SUBJ_CATLG">ANTHRO 105</span>
-courseTitleId = "SSR_CRSE_INFO_V_SSS_SUBJ_CATLG"
-
-#can assume that lecture and discussions/labs are all inside span tags
-
-lectureId = "SSR_CLSRCH_F_WK_SSR_CMPNT_DESCR_1$294$$"
-lectureMeetingTime = "SSR_CLSRCH_F_WK_SSR_MTG_SCHED_L_1$134$$"
-lectureInstructor = "SSR_CLSRCH_F_WK_SSR_INSTR_LONG_1$86$$"
-
-
-#discussion and lab query ids are the same
-discussionOrLabId = "SSR_CLSRCH_F_WK_SSR_CMPNT_DESCR_2$295$$"
-discussionOrLabMeetingTime = "SSR_CLSRCH_F_WK_SSR_MTG_SCHED_L_2$135$$"
-discussionOrLabInstructor = "SSR_CLSRCH_F_WK_SSR_INSTR_LONG_2$161$$"
-
 if spire_pass == '' or spire_log == '' or search_start == '':
     print("One or more fields in the configuration file are empty. Please fill them in and try again.", sep=' ', end='\n', file=sys.stdout, flush=False)
     os.system("pause")
@@ -85,28 +70,58 @@ def getNumCourses():
     b_parent = driver.find_element(By.CLASS_NAME, "ps-htmlarea")
     b = b_parent.find_element(By.TAG_NAME, "b")
     return int(b.text)
+
+def checkIfLectureOnly():
+    try:
+        print("checking if lecture only")
+        #checks if there is a lab component to the course
+        tempCheck = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_CMPNT_DESCR_2$295$$0")
+        return False
+    except NoSuchElementException:
+        print("failed")
+        return True
+    
+def checkIfLectureAndLab():
+    try:
+        print("checking if lecture and lab")
+        lectureCheck = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_CMPNT_DESCR_1$294$$0")
+        labCheck = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_CMPNT_DESCR_2$295$$0")
+        return True
+    except NoSuchElementException:
+        print("failed")
+        return False
+    
+def checkIfSeminar():
+    try:
+        print("checking if seminar")
+        seminarDays = driver.find_element(by=By.ID, value="SSR_CLSRCH_MTG1_SCHED$0_row0")
+        seminarInstructor = driver.find_element(by=By.ID, value="MTG_INSTR$0")
+        return True
+    except NoSuchElementException:
+        print("failed")
+        return False
     
 def checkClassType():
     #checks what type of class in a given course. depending on if lecture only, lecture and lab, or seminar only, returns "lectureOnly", "lectureAndLab", or "seminar"
     #use checkIfLectureOnly, checkIfLectureAndLab, or checkIfSeminar methods
-    
-    #start with lecture and lab
-    #labCheck checks if lab is present
-    labCheck = driver.find_elements(By.ID, labId)
-    if len(labCheck) > 0:
+    if checkIfLectureAndLab():
         print("lecture and lab")
-        return "lectureLab"
-    
-        
+        return "lectureAndLab"
+    elif checkIfLectureOnly():
+        print("lecture only")
+        return "lectureOnly"
+    else:
+        print("seminar")
+        return "seminar"
 
 #get information for lecture only classes
 def getLectureOnly(row):
+    courseTitle = driver.find_element(by=By.ID, value="SSR_CRSE_INFO_VW_DESCR$0_row" + str(row))
 
-    courseTitle = driver.find_element(by=By.ID, value = courseTitleId)
-
-    courseId = driver.find_element(by=By.ID, value = lectureId + str(row))
-    meetingDays = driver.find_element(by=By.ID, value = lectureMeetingTime + str(row))
-    instructor = driver.find_element(by=By.ID, value = lectureInstructor + str(row))
+    courseTitle = driver.find_element(by=By.ID, value="SSR_CRSE_INFO_V_SSS_SUBJ_CATLG")
+    courseId = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_CMPNT_DESCR_1$294$$" + str(row))
+    meetingDays = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_MTG_SCHED_L_1$134$$" + str(row))
+    instructor = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_INSTR_LONG_1$86$$" + str(row))
     
     course_info = LectureOnly(courseTitle.text, courseId.text, meetingDays.text, instructor.text)
 
@@ -131,57 +146,20 @@ def getSeminar(row):
     courseTitle  = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_CMPNT_DESCR_1$294$$" + str(row))
     courseId = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_MTG_SCHED_L_1$134$$" + str(row))
     meetingDays = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_MTG_DT_LONG_1$88$$" + str(row))
-    instructor = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_INSTR_LONG_1$86$$" + str(row))
 
     courseInfo = Seminar(courseTitle.text, courseId.text, meetingDays.text, instructor.text  )
 
     return courseInfo
 
-#courseTitleId: SSR_CRSE_INFO_V_SSS_SUBJ_CATLG
-
-#lectureId: SSR_CLSRCH_F_WK_SSR_CMPNT_DESCR_1$294$$ + rowNum
-#lectureMeetingTime: SSR_CLSRCH_F_WK_SSR_MTG_SCHED_L_1$134$$ + rowNum
-#lectureInstructor: SSR_CLSRCH_F_WK_SSR_INSTR_LONG_1$86$$ + rowNum
-
-#discussionTitleId: SSR_CLSRCH_F_WK_SSR_CMPNT_DESCR_2$295$$ + rowNum
-#discussionMeetingTime: SSR_CLSRCH_F_WK_SSR_MTG_SCHED_L_2$135$$ + rowNum
-#discussionInstructor: SSR_CLSRCH_F_WK_SSR_INSTR_LONG_2$161$$ + rowNum
-
-#labId: SSR_CLSRCH_F_WK_SSR_CMPNT_DESCR_2$295$$ + rowNum
-#labMeetingTime: SSR_CLSRCH_F_WK_SSR_MTG_SCHED_L_2$135$$ + rowNum
-#labInstructor: SSR_CLSRCH_F_WK_SSR_INSTR_LONG_2$161$$ + rowNum
-
 #gets course information from table
-def getCourseInformation(row, courseType):
-    if courseType == "lecture":
-        course_info = getLectureOnly(row)
-        print(course_info.courseTitle)
-        print(course_info.courseId)
-        print(course_info.meetingDays)
-        print(course_info.instructor)
-    elif courseType == "lectureLab":
-        course_info = getLectureAndLab(row)
-        print(course_info.courseTitle)
-        print(course_info.courseId)
-        print(course_info.meetingDays)
-        print(course_info.instructor)
-        print(course_info.labDays)
-        print(course_info.labInstructor)
-    elif courseType == "seminar":
-        course_info = getSeminar(row)
-        print(course_info.courseTitle)
-        print(course_info.courseId)
-        print(course_info.meetingDays)
-        print(course_info.instructor)
-        print(course_info.seminarDays)
-        print(course_info.seminarInstructor)
+def getCourseInformation(row):
+    
+    if checkClassType() == "lectureOnly":
+        return getLectureOnly(row)
+    elif checkClassType() == "lectureAndLab":
+        return getLectureAndLab(row)
     else:
-        print("course type not found")
-
-    return course_info
-        
-    
-    
+        return getSeminar(row)
     
     
         
@@ -219,7 +197,6 @@ def loopSubjects(subjectsArr):
 
 def loopCourses():
     numCourses = getNumCourses()
-    courseType = checkClassType()
     print(numCourses)
 
     foundCourses = 0
@@ -237,7 +214,15 @@ def loopCourses():
             numRows = getNumRows()  # get the fresh number of rows for the new course
             for j in range(0, numRows):
                 print("checking if lecture only, lecture and lab, or seminar")
-                getCourseInformation(j, courseType)          
+                if checkClassType() == "lectureOnly":
+                    course_info = getLectureOnly(j)
+                    print(course_info.courseTitle)
+                elif checkClassType() == "lectureAndLab":
+                    course_info = getLectureAndLab(j)
+                    print(course_info.courseTitle)
+                else:
+                    course_info = getSeminar(j)
+                    print(course_info.courseTitle)              
 
             time.sleep(3)
             driver.back()
