@@ -1,18 +1,19 @@
 import os
 import sys
-import selenium
+import time
+import configparser
+from subprocess import CREATE_NO_WINDOW
+
+from selenium import webdriver
 from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.chrome.service import Service
-import configparser
-from selenium import webdriver
-from subprocess import CREATE_NO_WINDOW
 from selenium.webdriver.common.by import By
-import time
+from selenium.webdriver.support.select import Select
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
 
-from selenium.webdriver.support.select import Select
-
-from subjects_array import subjectArr
+from subjects_array import subjects_array
 
 config = configparser.ConfigParser()
 config.read_file(open(r'config.txt'))
@@ -36,7 +37,7 @@ lectureInstructor = "SSR_CLSRCH_F_WK_SSR_INSTR_LONG_1$86$$"
 
 
 #discussion and lab query ids are the same
-discussionOrLabId = "SSR_CLSRCH_F_WK_SSR_CMPNT_DESCR_2$295$$"
+discussionOrLabId = "SSR_CLSRCH_F_WK_SSR_CMPNT_DESCR_2$295$$span$"
 discussionOrLabMeetingTime = "SSR_CLSRCH_F_WK_SSR_MTG_SCHED_L_2$135$$"
 discussionOrLabInstructor = "SSR_CLSRCH_F_WK_SSR_INSTR_LONG_2$161$$"
 
@@ -74,7 +75,7 @@ class Seminar:
         self.seminarDays = seminarDays
         self.seminarInstructor = seminarInstructor
 
-#getting number of rows in table after clicking on specific course
+#getting number of sections in table after clicking on specific course
 def getNumRows():
     tbody = driver.find_element(By.TAG_NAME, 'tbody')
     rows = tbody.find_elements(By.TAG_NAME, 'tr')
@@ -85,20 +86,27 @@ def getNumCourses():
     b_parent = driver.find_element(By.CLASS_NAME, "ps-htmlarea")
     b = b_parent.find_element(By.TAG_NAME, "b")
     return int(b.text)
-    
-def checkClassType():
-    #checks what type of class in a given course. depending on if lecture only, lecture and lab, or seminar only, returns "lectureOnly", "lectureAndLab", or "seminar"
+
+#will be used to created a variable dictating what type of class a given course is. For example, if a course has a lecture and lab, it will be a lectureLab type
+def classifyCourseType():
+    #checks what type of class in a given course. depending on if lecture only, lecture and lab, or seminar only, returns "lecture", "lectureLab", or "seminar"
     #use checkIfLectureOnly, checkIfLectureAndLab, or checkIfSeminar methods
     
-    #start with lecture and lab
-    #labCheck checks if lab is present
-    labCheck = driver.find_elements(By.ID, labId)
-    if len(labCheck) > 0:
-        print("lecture and lab")
+    #Check if lecture and lab/discussion
+    #check if lab or discussion section is present
+    try:
+        lectureCheck = driver.find_elements(by=By.ID, value = lectureId + "0")
+        labCheck = driver.find_elements(by=By.ID, value = discussionOrLabId + "0")
+                
+        #need to get text from the span tag to see if lab or discussion
+        print("lecture and lab/discussion")
         return "lectureLab"
-    
         
-
+    except:
+        print("lecture only")
+        return "lecture"
+        
+        
 #get information for lecture only classes
 def getLectureOnly(row):
 
@@ -178,14 +186,6 @@ def getCourseInformation(row, courseType):
     else:
         print("course type not found")
 
-    return course_info
-        
-    
-    
-    
-    
-        
-from selenium.common.exceptions import NoSuchElementException
 
 #loop through subjects
 def loopSubjects(subjectsArr):
@@ -217,10 +217,12 @@ def loopSubjects(subjectsArr):
 
         time.sleep(3)
 
-def loopCourses():
+def loopCourses(courseType):
     numCourses = getNumCourses()
-    courseType = checkClassType()
-    print(numCourses)
+    print("Number of courses: " + str(numCourses))
+
+    courseType = classifyCourseType()
+    print("Course type: " + str(courseType) + "\n")
 
     foundCourses = 0
 
@@ -232,11 +234,11 @@ def loopCourses():
             ActionChains(driver).click(course_to_click).perform()
             time.sleep(3)
 
-            print("checkpoint reached, starting loop")
+            print("checkpoint reached, starting loop to get each course section's data\n")
 
             numRows = getNumRows()  # get the fresh number of rows for the new course
             for j in range(0, numRows):
-                print("checking if lecture only, lecture and lab, or seminar")
+                print("getting course information for row: " + str(j) + "\n")
                 getCourseInformation(j, courseType)          
 
             time.sleep(3)
@@ -329,7 +331,7 @@ def main(time=time):
     
 
     
-    loopSubjects(subjectArr)
+    loopSubjects(subjects_array)
 
 
             

@@ -1,7 +1,7 @@
 # i want to export this list
 
-subjectArr = [
-'Accounting', 'Aerospace Studies', 'Afro-American Studies', 'Animal Science', 
+subjects_array = [
+'Aerospace Studies', 'Afro-American Studies', 'Animal Science', 
 'Anthropology', 'Anthropology - @Amherst', 'Arabic', 'Architecture', 'Art', 
 'Art History', 'Arts Extension', 'Asian - @Amherst', 'Asian Studies', 'Astronomy', 
 'Astronomy - @Amherst', 'Astronomy - @Mt Holyoke', 'Astronomy - @Smith', 
