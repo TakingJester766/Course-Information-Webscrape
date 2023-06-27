@@ -131,7 +131,7 @@ def getLectureOnly(row):
 
     
     instructor = driver.find_element(by=By.ID, value=lectureInstructor + str(row))
-    print("instructor: " + instructor.text)
+    print("instructor: " + instructor.text + " \n")
     
     course_info = LectureOnly(courseTitle.text, courseId.text, meetingDays, instructor.text)
 
@@ -156,7 +156,7 @@ def getLectureAndLab(row):
     labDays = driver.find_element(by=By.ID, value=discussionOrLabId + str(row))
     print("lab days: " + labDays.text) 
     labStaff = driver.find_element(by=By.ID, value=discussionOrLabInstructor + str(row))
-    print("lab staff: " + labStaff.text)
+    print("lab staff: " + labStaff.text + " \n")
 
     courseInfo = LectureAndLab(courseTitle.text, courseId.text, meetingDays.text, instructor.text, labId.text, labDays.text, labStaff.text)
 
@@ -213,7 +213,6 @@ def loopCourses():
 
     i = 0
 
-    print("Entering while loop\n")
     while foundCourses < numCourses:
         try:
             #clicks specific course under a subject
@@ -221,7 +220,6 @@ def loopCourses():
             ActionChains(driver).click(course_to_click).perform()
             time.sleep(3)
 
-            print("checkpoint reached, starting loop to get each course section's data")
             numRows = getNumRows()  # get the fresh number of rows for the new course
 
             courseType = classifyCourseType()
@@ -232,30 +230,18 @@ def loopCourses():
             for j in range(0, numRows):
                 print("getting course information for row: " + str(j) + "\n")
 
-                course_info = None
-
-                time.sleep(3)
-
                 if courseType == "lecture":
-                    print("lecture only")
                     course_info = getLectureOnly(j)
                 elif courseType == "lectureLab":
-                    print("lecture and lab")
                     course_info = getLectureAndLab(j)
                 elif courseType == "seminar":
-                    print("seminar")
                     course_info = getSeminar(j)
                 else:
                     print("course type not found")
 
-                print("course title: " + course_info.courseTitle)
 
-
-            time.sleep(3)
             driver.back()
             time.sleep(3)
-
-            print("current i: " + str(i))
 
             foundCourses += 1  # increment foundCourses at the end of each successful iteration
             i += 1  # increment i at the end of each successful iteration
@@ -318,7 +304,7 @@ def main(time=time):
     ActionChains(driver)\
         .click(add_drop_edit_btn)\
         .perform()
-    time.sleep(3)
+    time.sleep(4)
 
     #navigate to search add enroll button
     search_add_enroll_btn = driver.find_element(by=By.ID, value="SCC_LO_FL_WRK_SCC_VIEW_BTN$24$$11")
@@ -336,22 +322,6 @@ def main(time=time):
 
     
     loopSubjects(subjects_array)
-
-
-            
-
-
-            
-
-            
-            
-
-    
-
-    
-        
-
-    
 
     
 
