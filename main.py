@@ -107,9 +107,6 @@ def classifyCourseType():
         return "lecture"
     
         
-        
-        
-        
 #get information for lecture only classes
 def getLectureOnly(row):
 
@@ -143,7 +140,7 @@ def getLectureAndLab(row):
 
     courseTitle = driver.find_element(by=By.ID, value=courseTitleId)
     print("course title: " + courseTitle.text)
-
+    
     courseId = driver.find_element(by=By.ID, value=lectureId + str(row))
     print("course id: " + courseId.text)
     meetingDays = driver.find_element(by=By.ID, value=lectureMeetingTime + str(row))
@@ -199,6 +196,13 @@ def loopSubjects(subjectsArr):
            
         time.sleep(3)
 
+        all_classes_btn = driver.find_element(by=By.ID, value="PTS_BREADCRUMB_PTS_IMG$0")
+        ActionChains(driver)\
+            .click(all_classes_btn)\
+            .perform()
+        
+        time.sleep(3)
+
         loopCourses()
 
         time.sleep(3)
@@ -252,15 +256,12 @@ def loopCourses():
             print("i incremented to: " + str(i))
             if i >= numCourses:
                 print("No more courses to click. Exiting loop.")
+                back_btn = driver.find_element(by=By.ID, value="PT_WORK_PT_BUTTON_BACK")
+                ActionChains(driver).click(back_btn).perform()
+                time.sleep(3)
                 break
             continue
 
-        #if all courses found, click this id: PT_WORK_PT_BUTTON_BACK
-        if foundCourses == numCourses:
-            back_btn = driver.find_element(by=By.ID, value="PT_WORK_PT_BUTTON_BACK")
-            ActionChains(driver).click(back_btn).perform()
-            time.sleep(3)
-            break
 
 
 
