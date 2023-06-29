@@ -230,17 +230,12 @@ def loopCourses():
             print("i incremented to: " + str(i))
             continue
 
+    #After exiting while loop, signifies that all courses have been found for the given subject. Click back button to return to search page and start next subject
     back_btn = driver.find_element(by=By.ID, value="PT_WORK_PT_BUTTON_BACK")
     ActionChains(driver).click(back_btn).perform()
     time.sleep(3)
 
-
-
-
-
-
-
-
+# MAIN METHOD, RUNS EVERYTHING
 def main(time=time):    
     # log into spire using driver
     driver.get("https://www.umass.edu/it/spire")
