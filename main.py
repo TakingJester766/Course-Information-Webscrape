@@ -229,8 +229,6 @@ def loopCourses():
             courseType = classifyCourseType()
             print("Course type: " + str(courseType) + "\n")
 
-            time.sleep(3)
-
             for j in range(0, numRows):
                 print("getting course information for row: " + str(j) + "\n")
 
