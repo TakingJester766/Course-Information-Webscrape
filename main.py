@@ -52,6 +52,7 @@ if spire_pass == '' or spire_log == '' or search_start == '':
 #to have getCourseInformation return an object
 class LectureOnly:
     def __init__(self, courseTitle, courseId, meetingDays, instructor):
+        self.courseType = "lectureOnly"
         self.courseTitle = courseTitle
         self.courseId = courseId
         self.meetingDays = meetingDays
@@ -60,6 +61,7 @@ class LectureOnly:
 #class for if lecture and lab in same course
 class LectureAndLab:
     def __init__(self, courseTitle, courseId, meetingDays, lectureInstructor, labId, labDays, labInstructor):
+        self.courseType = "lectureLab"
         self.courseTitle = courseTitle
         self.courseId = courseId
         self.meetingDays = meetingDays
@@ -67,16 +69,6 @@ class LectureAndLab:
         self.labId = labId
         self.labDays = labDays
         self.labInstructor = labInstructor
-
-#for seminar classes
-class Seminar:
-    def __init__(self, courseTitle, courseId, meetingDays, instructor, seminarDays, seminarInstructor):
-        self.courseTitle = courseTitle
-        self.courseId = courseId
-        self.meetingDays = meetingDays
-        self.instructor = instructor
-        self.seminarDays = seminarDays
-        self.seminarInstructor = seminarInstructor
 
 #getting number of sections in table after clicking on specific course
 def getNumRows():
@@ -105,68 +97,55 @@ def classifyCourseType():
         return "lectureLab"
     else:
         return "lecture"
+
+
+def getCourseInfo(row, courseType):
+
     
+    
+    if (courseType == "lectureLab"):
+        # do a for loop after classifying
+        courseTitle = driver.find_element(by=By.ID, value=courseTitleId)
+        print("course title: " + courseTitle.text)
         
-#get information for lecture only classes
-def getLectureOnly(row):
+        courseId = driver.find_element(by=By.ID, value=lectureId + str(row))
+        print("course id: " + courseId.text)
+        meetingDays = driver.find_element(by=By.ID, value=lectureMeetingTime + str(row))
+        print("meeting days: " + meetingDays.text)
+        instructor = driver.find_element(by=By.ID, value=lectureInstructor + str(row))
+        print("instructor: " + instructor.text)
 
-    print("getting lecture information")
+        labId = driver.find_element(by=By.ID, value=discussionOrLabId + str(row))
+        print("lab id: " + labId.text)
+        labDays = driver.find_element(by=By.ID, value=discussionOrLabId + str(row))
+        print("lab days: " + labDays.text) 
+        labStaff = driver.find_element(by=By.ID, value=discussionOrLabInstructor + str(row))
+        print("lab staff: " + labStaff.text + " \n")
 
-    courseTitle = driver.find_element(by=By.ID, value=courseTitleId)
-    print("course title: " + courseTitle.text)
-
-    courseId = driver.find_element(by=By.ID, value=lectureId + str(row))
-    print("course id: " + courseId.text)
-
-    meetingDays = None
-    try:
-        meetingDaysTemp = driver.find_element(by=By.ID, value=lectureMeetingTime + str(row))
-        meetingDays = meetingDaysTemp.text
-        print("meeting days: " + meetingDays)
-    except NoSuchElementException:
-        meetingDays = "Multiple meeting schedules"
-
+        courseInfo = LectureAndLab(courseTitle.text, courseId.text, meetingDays.text, instructor.text, labId.text, labDays.text, labStaff.text)
     
-    instructor = driver.find_element(by=By.ID, value=lectureInstructor + str(row))
-    print("instructor: " + instructor.text + " \n")
-    
-    course_info = LectureOnly(courseTitle.text, courseId.text, meetingDays, instructor.text)
+    else:
+        
+        print("getting lecture information")
 
-    return course_info
+        courseTitle = driver.find_element(by=By.ID, value=courseTitleId)
+        print("course title: " + courseTitle.text)
 
-#get information for lecture and lab classes
-def getLectureAndLab(row):
-    print("getting lecture and lab information")
+        courseId = driver.find_element(by=By.ID, value=lectureId + str(row))
+        print("course id: " + courseId.text)
 
-    courseTitle = driver.find_element(by=By.ID, value=courseTitleId)
-    print("course title: " + courseTitle.text)
-    
-    courseId = driver.find_element(by=By.ID, value=lectureId + str(row))
-    print("course id: " + courseId.text)
-    meetingDays = driver.find_element(by=By.ID, value=lectureMeetingTime + str(row))
-    print("meeting days: " + meetingDays.text)
-    instructor = driver.find_element(by=By.ID, value=lectureInstructor + str(row))
-    print("instructor: " + instructor.text)
+        try:
+            meetingDaysTemp = driver.find_element(by=By.ID, value=lectureMeetingTime + str(row))
+            meetingDays = meetingDaysTemp.text
+            print("meeting days: " + meetingDays)
+        except NoSuchElementException:
+            meetingDays = "Multiple meeting schedules"
 
-    labId = driver.find_element(by=By.ID, value=discussionOrLabId + str(row))
-    print("lab id: " + labId.text)
-    labDays = driver.find_element(by=By.ID, value=discussionOrLabId + str(row))
-    print("lab days: " + labDays.text) 
-    labStaff = driver.find_element(by=By.ID, value=discussionOrLabInstructor + str(row))
-    print("lab staff: " + labStaff.text + " \n")
-
-    courseInfo = LectureAndLab(courseTitle.text, courseId.text, meetingDays.text, instructor.text, labId.text, labDays.text, labStaff.text)
-
-    return courseInfo
-
-#get information for seminar classes
-def getSeminar(row):
-    courseTitle  = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_CMPNT_DESCR_1$294$$" + str(row))
-    courseId = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_MTG_SCHED_L_1$134$$" + str(row))
-    meetingDays = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_MTG_DT_LONG_1$88$$" + str(row))
-    instructor = driver.find_element(by=By.ID, value="SSR_CLSRCH_F_WK_SSR_INSTR_LONG_1$86$$" + str(row))
-
-    courseInfo = Seminar(courseTitle.text, courseId.text, meetingDays.text, instructor.text  )
+        
+        instructor = driver.find_element(by=By.ID, value=lectureInstructor + str(row))
+        print("instructor: " + instructor.text + " \n")
+        
+        courseInfo = LectureOnly(courseTitle.text, courseId.text, meetingDays, instructor.text)
 
     return courseInfo
 
@@ -193,13 +172,6 @@ def loopSubjects(subjectsArr):
         ActionChains(driver)\
             .click(search_btn)\
             .perform()
-           
-        time.sleep(3)
-
-        all_classes_btn = driver.find_element(by=By.ID, value="PTS_BREADCRUMB_PTS_IMG$0")
-        ActionChains(driver)\
-            .click(all_classes_btn)\
-            .perform()
         
         time.sleep(3)
 
@@ -217,8 +189,17 @@ def loopCourses():
 
     i = 0
 
-    while foundCourses < numCourses:
+    while foundCourses <= numCourses:
         try:
+
+            #clicks all classes button
+            all_classes_btn = driver.find_element(by=By.ID, value="PTS_BREADCRUMB_PTS_IMG$0")
+            ActionChains(driver)\
+                .click(all_classes_btn)\
+                .perform()
+        
+            time.sleep(3)   
+
             #clicks specific course under a subject
             course_to_click = driver.find_element(by=By.ID, value="PTS_LIST_TITLE$" + str(i))
             ActionChains(driver).click(course_to_click).perform()
@@ -229,38 +210,29 @@ def loopCourses():
             courseType = classifyCourseType()
             print("Course type: " + str(courseType) + "\n")
 
-            time.sleep(3)
-
             for j in range(0, numRows):
                 print("getting course information for row: " + str(j) + "\n")
 
-                if courseType == "lecture":
-                    course_info = getLectureOnly(j)
-                elif courseType == "lectureLab":
-                    course_info = getLectureAndLab(j)
-                elif courseType == "seminar":
-                    course_info = getSeminar(j)
-                else:
-                    print("course type not found")
+                getCourseInfo(j, courseType)
 
+
+            foundCourses += 1  # increment foundCourses at the end of each successful iteration
+            i += 1  # increment i at the end of each successful iteration
 
             driver.back()
             time.sleep(3)
 
-            foundCourses += 1  # increment foundCourses at the end of each successful iteration
-            i += 1  # increment i at the end of each successful iteration
+            
 
         except NoSuchElementException:
             print("Element not found. Incrementing i by 1. i currently: " + str(i))
             i += 1
             print("i incremented to: " + str(i))
-            if i >= numCourses:
-                print("No more courses to click. Exiting loop.")
-                back_btn = driver.find_element(by=By.ID, value="PT_WORK_PT_BUTTON_BACK")
-                ActionChains(driver).click(back_btn).perform()
-                time.sleep(3)
-                break
             continue
+
+    back_btn = driver.find_element(by=By.ID, value="PT_WORK_PT_BUTTON_BACK")
+    ActionChains(driver).click(back_btn).perform()
+    time.sleep(3)
 
 
 
