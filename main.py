@@ -15,6 +15,13 @@ from selenium.common.exceptions import NoSuchElementException
 
 from subjects_array import subjects_array
 
+#mongodb imports
+from mongo_utils import MongoDBManager
+
+#other mongo db configs
+mongo_manager = MongoDBManager('courses', 'subjects')
+
+
 config = configparser.ConfigParser()
 config.read_file(open(r'config.txt'))
 spire_log = config.get('Config', 'login')
@@ -154,6 +161,10 @@ def loopSubjects(subjectsArr):
 
     for subject in subjectsArr:
 
+        #for mongodb array
+        courses = []
+
+
         #select additional ways to search button
         additional_ways_to_search = driver.find_element(by=By.ID, value="SSR_CLSRCH_FLDS_PTS_ADV_SRCH")
         ActionChains(driver)\
@@ -175,11 +186,13 @@ def loopSubjects(subjectsArr):
         
         time.sleep(3)
 
-        loopCourses()
+        loopCourses(subject, courses)
+
+        mongo_manager.save_subject(subject, courses)
 
         time.sleep(3)
 
-def loopCourses():
+def loopCourses(subject, courses):
     numCourses = getNumCourses()
     print("Number of courses: " + str(numCourses))
 
@@ -213,8 +226,12 @@ def loopCourses():
             for j in range(0, numRows):
                 print("getting course information for row: " + str(j) + "\n")
 
-                getCourseInfo(j, courseType)
-
+                courseInfo = getCourseInfo(j, courseType)
+                course_dict = vars(courseInfo)
+                courses.append({
+                    'courseName': course_dict['courseTitle'],
+                    'courseSections': [course_dict]
+                })
 
             foundCourses += 1  # increment foundCourses at the end of each successful iteration
             i += 1  # increment i at the end of each successful iteration
