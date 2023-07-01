@@ -66,82 +66,93 @@ courses_array = [
 
 ]
 
-def create_course_obj(subject, courseObj):
-    if courseObj.courseType == "lectureOnly":
-        document = {
-            "subjectName": subject,
-            "subjectCourses": [
+def create_and_append_obj(course_obj):
+    if course_obj.courseType == "lectureOnly":
+        course = {
+            "courseName": course_obj.courseTitle,
+            "courseSections": [
                 {
-                    "courseName": courseObj.courseTitle,
-                    "courseSections": [
-                        {
-                            "lectureSection": courseObj.courseId,
-                            "lectureTime": courseObj.meetingDays,
-                            "lectureInstructor": courseObj.instructor,
-                        }
-                    ]
+                    "lectureSection": course_obj.courseId,
+                    "lectureTime": course_obj.meetingDays,
+                    "lectureInstructor": course_obj.instructor
                 }
             ]
         }
-        subjects.insert_one(document)
+        courses_array.append(course)
     else:
-        document = {
-            "subjectName": subject,
-            "subjectCourses": [
+        course = {
+            "courseName": course_obj.courseTitle,
+            "courseSections": [
                 {
-                    "courseName": courseObj.courseTitle,
-                    "courseSections": [
-                        {
-                            "lectureSection": courseObj.courseId,
-                            "lectureTime": courseObj.meetingDays,
-                            "lectureInstructor": courseObj.lectureInstructor,
-                        },
-                        {
-                            "labSection": courseObj.labId,
-                            "labTime": courseObj.labDays,
-                            "labInstructor": courseObj.labInstructor,
-                        }
-                    ]
+                    "lectureSection": course_obj.courseId,
+                    "lectureTime": course_obj.meetingDays,
+                    "lectureInstructor": course_obj.lectureInstructor
+                },
+                {
+                    "labSection": course_obj.labId,
+                    "labTime": course_obj.labDays,
+                    "labInstructor": course_obj.labInstructor
+
                 }
             ]
         }
-        subjects.insert_one(document)
+        courses_array.append(course)
 
-
-        
 
 
 # The document you want to insert
-document = {
-    "subjectName": "Accounting",
-    "subjectCourses": [
+#document = {
+#    "subjectName": "Accounting",
+#    "subjectCourses": [
         
-        courses_array[0]
+#        courses_array[0]
             
         
-    ]
-}
+#    ]
+#}
 
 # Insert the document
-subjects.insert_one(document)
+#ubjects.insert_one(document)
 
 # to add to the subjectCourses array:
 
 # The new course you want to add
 # The new course you want to add
-new_course = courses_array[1]
+#new_course = courses_array[1]
                 
             
 
 
 
 # Use the $push operator to add the new course to the subjectCourses array
-subjects.update_one(
-    {"subjectName": "Accounting"}, 
-    {"$push": {"subjectCourses": new_course}}
-)
+#subjects.update_one(
+#    {"subjectName": "Accounting"}, 
+#    {"$push": {"subjectCourses": new_course}}
+#)
 
 
 #read all courses in Account subjectName:
-accounting = subjects.find_one({"subjectName": "Accounting"})
-print(accounting)
+#accounting = subjects.find_one({"subjectName": "Accounting"})
+#print(accounting)
+
+#automate looping through all courses in array and adding them to given subjectName
+
+#subjectDocument = {
+#    "subjectName": "Accounting",
+#    "subjectCourses": courses_array
+#}
+
+def upload_docs(subject_name, courses_array):
+    subjectDocument = {
+        "subjectName": subject_name,
+        "subjectCourses": courses_array
+    }
+
+    subjects.insert_one(subjectDocument)
+
+
+
+
+#it works!
+#upload_docs("Accounting", courses_array)
+
