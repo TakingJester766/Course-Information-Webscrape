@@ -13,26 +13,6 @@ class MongoDBManager:
         self.db = self.client[courses] # change 'db_name' to your database name
         self.collection = self.db[subjects] # change 'collection_name' to your collection name
 
-class LectureOnly:
-    def __init__(self, courseTitle, courseId, meetingDays, instructor):
-        self.courseType = "lectureOnly"
-        self.courseTitle = courseTitle
-        self.courseId = courseId
-        self.meetingDays = meetingDays
-        self.instructor = instructor
-
-class LectureAndLab:
-    def __init__(self, courseTitle, courseId, meetingDays, lectureInstructor, labId, labDays, labInstructor):
-        self.courseType = "lectureLab"
-        self.courseTitle = courseTitle
-        self.courseId = courseId
-        self.meetingDays = meetingDays
-        self.lectureInstructor = lectureInstructor
-        self.labId = labId
-        self.labDays = labDays
-        self.labInstructor = labInstructor
-
-
 password = os.environ.get("MONGODB_PWD")
 connection_string = f"mongodb+srv://zimmermanalex13:{password}@coursers.elqhzuf.mongodb.net/?retryWrites=true&w=majority"
 
@@ -41,7 +21,85 @@ courses_db = client.courses\
 
 subjects = courses_db.subjects
 
-courses_array = [
+
+courses_array = []
+child_obj_array = []
+
+#lecture_only_obj = LectureOnly("ACCOUNTG 371", "Class 75028: Lecture 01", "Monday Wednesday Friday 10:10AM to 11:00AM", "Sean Wandrei")
+
+
+def create_child_obj(course_type, course_obj):
+    if course_type == "lectureOnly":
+        
+        print("CREATE CHILD OBJ")
+        print(course_obj.courseId)
+        print(course_obj.meetingDays)
+        print(course_obj.instructor)
+
+        course = {
+            "lectureSection": course_obj.courseId,
+            "lectureTime": course_obj.meetingDays,
+            "lectureInstructor": course_obj.instructor
+        }
+        child_obj_array.append(course)
+    elif course_type == "lectureLab":
+        course = {
+            "lectureSection": course_obj.courseId,
+            "lectureTime": course_obj.meetingDays,
+            "lectureInstructor": course_obj.lectureInstructor,
+            "labSection": course_obj.labId,
+            "labTime": course_obj.labDays,
+            "labInstructor": course_obj.labInstructor
+        }
+        child_obj_array.append(course)
+
+
+def create_parent_obj(course_title, course_type):
+    if course_type == "lectureOnly":
+        course = {
+            "courseName": course_title,
+            "courseSections": [
+                child_obj_array
+            ]
+        }
+        print(course)
+        courses_array.append(course)
+    else:
+        course = {
+            "courseName": course_title,
+            "courseSections": [
+                child_obj_array
+            ]
+        }
+        print(course)
+        courses_array.append(course)
+
+def upload_docs(subject_name):
+    subjectDocument = {
+        "subjectName": subject_name,
+        "subjectCourses": courses_array
+    }
+
+    subjects.insert_one(subjectDocument)
+
+
+'''
+create_child_obj("lectureOnly", lecture_only_obj)
+
+create_parent_obj("ACCOUNTG 371", "lectureOnly")
+
+upload_docs("Accounting")
+
+
+'''
+
+
+
+
+#it works!
+#upload_docs("Accounting", courses_array)
+
+"""
 
 {
       "courseName": "ACCOUNTG 371",
@@ -64,95 +122,4 @@ courses_array = [
       ]
     }
 
-]
-
-def create_and_append_obj(course_obj):
-    if course_obj.courseType == "lectureOnly":
-        course = {
-            "courseName": course_obj.courseTitle,
-            "courseSections": [
-                {
-                    "lectureSection": course_obj.courseId,
-                    "lectureTime": course_obj.meetingDays,
-                    "lectureInstructor": course_obj.instructor
-                }
-            ]
-        }
-        courses_array.append(course)
-    else:
-        course = {
-            "courseName": course_obj.courseTitle,
-            "courseSections": [
-                {
-                    "lectureSection": course_obj.courseId,
-                    "lectureTime": course_obj.meetingDays,
-                    "lectureInstructor": course_obj.lectureInstructor
-                },
-                {
-                    "labSection": course_obj.labId,
-                    "labTime": course_obj.labDays,
-                    "labInstructor": course_obj.labInstructor
-
-                }
-            ]
-        }
-        courses_array.append(course)
-
-
-
-# The document you want to insert
-#document = {
-#    "subjectName": "Accounting",
-#    "subjectCourses": [
-        
-#        courses_array[0]
-            
-        
-#    ]
-#}
-
-# Insert the document
-#ubjects.insert_one(document)
-
-# to add to the subjectCourses array:
-
-# The new course you want to add
-# The new course you want to add
-#new_course = courses_array[1]
-                
-            
-
-
-
-# Use the $push operator to add the new course to the subjectCourses array
-#subjects.update_one(
-#    {"subjectName": "Accounting"}, 
-#    {"$push": {"subjectCourses": new_course}}
-#)
-
-
-#read all courses in Account subjectName:
-#accounting = subjects.find_one({"subjectName": "Accounting"})
-#print(accounting)
-
-#automate looping through all courses in array and adding them to given subjectName
-
-#subjectDocument = {
-#    "subjectName": "Accounting",
-#    "subjectCourses": courses_array
-#}
-
-def upload_docs(subject_name, courses_array):
-    subjectDocument = {
-        "subjectName": subject_name,
-        "subjectCourses": courses_array
-    }
-
-    subjects.insert_one(subjectDocument)
-
-
-
-
-#it works!
-#upload_docs("Accounting", courses_array)
-
+"""
