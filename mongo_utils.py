@@ -27,9 +27,8 @@ child_obj_array = []
 
 #lecture_only_obj = LectureOnly("ACCOUNTG 371", "Class 75028: Lecture 01", "Monday Wednesday Friday 10:10AM to 11:00AM", "Sean Wandrei")
 
-
-def create_child_obj(course_type, course_obj):
-    if course_type == "lectureOnly":
+def create_child_obj(course_obj):
+    if course_obj.courseType == "lectureOnly":
         
         print("CREATE CHILD OBJ")
         print(course_obj.courseId)
@@ -42,7 +41,7 @@ def create_child_obj(course_type, course_obj):
             "lectureInstructor": course_obj.instructor
         }
         child_obj_array.append(course)
-    elif course_type == "lectureLab":
+    elif course_obj.courseType == "lectureLab":
         course = {
             "lectureSection": course_obj.courseId,
             "lectureTime": course_obj.meetingDays,
@@ -52,9 +51,12 @@ def create_child_obj(course_type, course_obj):
             "labInstructor": course_obj.labInstructor
         }
         child_obj_array.append(course)
+    else:
+        print("ERROR: Course type not found")
 
 
 def create_parent_obj(course_title, course_type):
+    print(child_obj_array)
     if course_type == "lectureOnly":
         course = {
             "courseName": course_title,
@@ -73,6 +75,8 @@ def create_parent_obj(course_title, course_type):
         }
         print(course)
         courses_array.append(course)
+    
+
 
 def upload_docs(subject_name):
     subjectDocument = {

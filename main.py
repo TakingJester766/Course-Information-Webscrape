@@ -16,7 +16,9 @@ from selenium.common.exceptions import NoSuchElementException
 from subjects_array import subjects_array
 
 #imports for mongodb
-from mongo_utils import MongoDBManager, create_child_obj, create_parent_obj, upload_docs, courses_array, child_obj_array
+from mongo_utils import create_child_obj, create_parent_obj, upload_docs, child_obj_array, courses_array
+import mongo_utils
+
 
 config = configparser.ConfigParser()
 config.read_file(open(r'config.txt'))
@@ -180,7 +182,7 @@ def loopSubjects(subjects_array):
 
 def loopCourses(subject):
     
-    foundCourses = 22
+    foundCourses = 20
     i = 0
     firstIteration = True
 
@@ -200,7 +202,7 @@ def loopCourses(subject):
 
     while foundCourses < numCourses:
 
-        child_obj_array.clear()  # clear child_obj_array for each new course
+        #mongo_utils.child_obj_array.clear()  # Reset child_obj_array for each new course
 
         #makes all classes visible, except in first iteration
         if not firstIteration:
@@ -208,8 +210,10 @@ def loopCourses(subject):
             ActionChains(driver)\
                 .click(all_classes_btn)\
                 .perform()
+            
             time.sleep(3)
         else:
+            
             firstIteration = False
 
 
@@ -234,11 +238,14 @@ def loopCourses(subject):
                 course_obj = getCourseInfo(j, courseType)
 
                 print("appending to child_obj_array")
-                create_child_obj(courseType, course_obj)
+                create_child_obj(course_obj)
+
                 
             
 
             create_parent_obj(course_title.text, courseType)
+            #mongo_utils.child_obj_array.clear()  # puting it here returns empty arrays
+
 
             foundCourses += 1  # increment foundCourses at the end of each successful iteration
             i += 1  # increment i at the end of each successful iteration
@@ -255,6 +262,10 @@ def loopCourses(subject):
             print("Element not found. Incrementing i by 1. i currently: " + str(i))
             i += 1  # increment i only in the exception, if a course was not found
             continue
+
+            
+
+
         
     #once all courses found, exits loop. uploads to db then goes to next subject.
 
