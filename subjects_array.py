@@ -1,7 +1,10 @@
-# i want to export this list
-#removed "Accounting" for testing purposes
+'''
+Found courses:
+'Accounting', 'Aerospace Studies', 
+'''
+
 subjects_array = [
-'Accounting', 'Aerospace Studies', 'Afro-American Studies', 'Animal Science', 
+'Afro-American Studies', 'Animal Science', 
 'Anthropology', 'Anthropology - @Amherst', 'Arabic', 'Architecture', 'Art', 
 'Art History', 'Arts Extension', 'Asian - @Amherst', 'Asian Studies', 'Astronomy', 
 'Astronomy - @Amherst', 'Astronomy - @Mt Holyoke', 'Astronomy - @Smith', 

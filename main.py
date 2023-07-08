@@ -18,8 +18,7 @@ import asyncio
 from subjects_array import subjects_array
 
 #imports for mongodb
-from mongo_utils import create_child_obj, create_parent_obj, upload_docs, child_obj_array, courses_array
-import mongo_utils
+from mongo_utils import create_child_obj, create_parent_obj
 
 
 config = configparser.ConfigParser()
@@ -198,7 +197,7 @@ def loopSubjects(subjects_array):
 
 def loopCourses(subject):
     
-    foundCourses = 22
+    foundCourses = 0
     i = 0
     firstIteration = True
 
@@ -230,6 +229,7 @@ def loopCourses(subject):
         else:
             
             firstIteration = False
+            time.sleep(3)
 
 
         try:
@@ -241,8 +241,10 @@ def loopCourses(subject):
             time.sleep(3)
 
             course_title = wait.until(EC.visibility_of_element_located((By.ID, courseTitleId)))
+            textTitle = course_title.text
+
             #course_title = driver.find_element(by=By.ID, value=courseTitleId)
-            print("course title: " + course_title.text)
+            print("course title: " + textTitle)
 
             numRows = getNumRows()  # get the fresh number of rows for the new course
 
@@ -261,7 +263,7 @@ def loopCourses(subject):
 
             #will be used as a try/except for if a course is not found or can't upload. will write to error log if so, then go back to uploading courses.
             try:
-                asyncio.run(create_parent_obj(course_title.text, subject))
+                asyncio.run(create_parent_obj(textTitle, subject))
                 #mongo_utils.child_obj_array.clear()  # puting it here returns empty arrays
 
 
@@ -275,7 +277,7 @@ def loopCourses(subject):
                 driver.back()
                 time.sleep(3)
             except:
-                writeErrorLog(course_title.text, subject, "Error uploading course to database")
+                writeErrorLog(course_title, subject, "Error uploading course to database")
                 foundCourses += 1  # increment foundCourses, ended in error but still found and logged error for later
                 driver.back()
                 time.sleep(3)
@@ -327,7 +329,8 @@ def main(time=time):
     #driver.get("https://www.spire.umass.edu/psc/heproda_newwin/EMPLOYEE/SA/c/UM_H_SELF_SERVICE_FL.UM_H_SS_RMSELHM_FL.GBL?NavColl=true")    
 
     #switch to add drop edit dropdown
-    add_drop_edit_btn = driver.find_element(by=By.ID, value="SCC_LO_FL_WRK_SCC_VIEW_BTN$IMG$2")
+    add_drop_edit_btn = wait.until(EC.visibility_of_element_located((By.ID, "SCC_LO_FL_WRK_SCC_VIEW_BTN$IMG$2")))
+    #add_drop_edit_btn = driver.find_element(by=By.ID, value="SCC_LO_FL_WRK_SCC_VIEW_BTN$IMG$2")
     ActionChains(driver)\
         .click(add_drop_edit_btn)\
         .perform()

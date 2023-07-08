@@ -88,7 +88,7 @@ async def create_parent_obj(course_title, subject_name):
     child_obj_array.clear()
     
 
-
+'''
 def upload_docs(subject_name):
     print("COURSES ARRAY CONTENTS: " + str(courses_array) + "\n")
     subjectDocument = {
@@ -99,3 +99,4 @@ def upload_docs(subject_name):
     subjects.insert_one(subjectDocument)
     print("Success, clearning courses array")
     courses_array.clear()
+'''
