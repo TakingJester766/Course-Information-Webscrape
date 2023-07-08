@@ -34,18 +34,17 @@ def remove_duplicates(child_obj_array):
         temp_set = set(map(lambda x: str(x), child_obj_array))  # Convert dicts to strings and add to a set to remove duplicates
         return list(map(lambda x: eval(x), temp_set))  # Convert strings back to dicts
     except SyntaxError as e:
-        print(f"Encountered a syntax error when trying to evaluate a dictionary: {e}")
+        print(f"Encountered a syntax error when trying to evaluate a dictionary: {e} \n")
+        print("PROBLEM DICTIONARY: " + str(child_obj_array) + "\n")
         return child_obj_array  # Return the original list if a syntax error occurs
 
 
 def create_child_obj(course_obj):
     global child_obj_array
     if course_obj.courseType == "lectureOnly":
-        
-        #print("CREATE CHILD OBJ")
-        #print(course_obj.courseId)
-        #print(course_obj.meetingDays)
-        #print(course_obj.instructor)
+
+        #remove "\n" from meeting times
+        course_obj.meetingDays = course_obj.meetingDays.replace("\n", " ")
 
         course = {
             "lectureSection": course_obj.courseId,
@@ -55,9 +54,12 @@ def create_child_obj(course_obj):
         child_obj_array.append(course)
         child_obj_array = remove_duplicates(child_obj_array)
 
-        print("HERE IS THE CHILD COURSE OBJ: " + str(course) + "\n")
-        print("HERE IS THE CHILD OBJ ARRAY: " + str(child_obj_array) + "\n")
     elif course_obj.courseType == "lectureLab":
+
+        #remove "\n" from meeting times
+        course_obj.meetingDays = course_obj.meetingDays.replace("\n", " ")
+        course_obj.labDays = course_obj.labDays.replace("\n", " ")
+
         course = {
             "lectureSection": course_obj.courseId,
             "lectureTime": course_obj.meetingDays,
@@ -69,32 +71,20 @@ def create_child_obj(course_obj):
         child_obj_array.append(course)
         child_obj_array = remove_duplicates(child_obj_array)
 
-        print("HERE IS THE CHILD COURSE OBJ: " + str(course) + "\n")
-        print("HERE IS THE CHILD OBJ ARRAY: " + str(child_obj_array) + "\n")
     else:
         print("ERROR: Course type not found")
 
+def create_parent_obj(course_title, subject_name):
+    global child_obj_array
+    global subjects
 
-def create_parent_obj(course_title, course_type):
-    #print(child_obj_array)
-    if course_type == "lectureOnly":
-        course = {
-            "courseName": course_title,
-            "courseSections": [
-                list(child_obj_array)
-            ]
-        }
-        print("HERE IS THE PARENT COURSE OBJ: " + str(course) + "\n")
-        courses_array.append(course)
-    else:
-        course = {
-            "courseName": course_title,
-            "courseSections": [
-                list(child_obj_array)
-            ]
-        }
-        print("HERE IS THE PARENT COURSE OBJ: " + str(course) + "\n")
-        courses_array.append(course)
+    course = {
+        "courseName": course_title,
+        "courseSections": list(child_obj_array)
+    }
+
+    # Insert/Update the course into the MongoDB collection
+    subjects.update_one({"subjectName": subject_name}, {"$push": {"subjectCourses": course}}, upsert=True)
     child_obj_array.clear()
     
 
@@ -109,6 +99,3 @@ def upload_docs(subject_name):
     subjects.insert_one(subjectDocument)
     print("Success, clearning courses array")
     courses_array.clear()
-    
-
-

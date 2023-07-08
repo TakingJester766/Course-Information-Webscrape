@@ -13,6 +13,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
 
+
 from subjects_array import subjects_array
 
 #imports for mongodb
@@ -45,6 +46,9 @@ discussionOrLabId = "SSR_CLSRCH_F_WK_SSR_CMPNT_DESCR_2$295$$"
 discussionOrLabMeetingTime = "SSR_CLSRCH_F_WK_SSR_MTG_SCHED_L_2$135$$"
 discussionOrLabInstructor = "SSR_CLSRCH_F_WK_SSR_INSTR_LONG_2$161$$"
 
+#wait for element to load
+timeout = 10
+wait = WebDriverWait(driver, timeout)
 
 
 if spire_pass == '' or spire_log == '' or search_start == '':
@@ -119,12 +123,12 @@ def getCourseInfo(row, courseType):
 
         labId = driver.find_element(by=By.ID, value=discussionOrLabId + str(row))
         print("lab id: " + labId.text)
-        labDays = driver.find_element(by=By.ID, value=discussionOrLabId + str(row))
+        labDays = driver.find_element(by=By.ID, value=discussionOrLabMeetingTime + str(row))
         print("lab days: " + labDays.text) 
         labInstructor = driver.find_element(by=By.ID, value=discussionOrLabInstructor + str(row))
         print("lab staff: " + labInstructor.text + " \n")
 
-        courseInfo = LectureAndLab(courseId.text, meetingDays.text, lectureInstructor.text, labId.text, labDays.text, labInstructor)
+        courseInfo = LectureAndLab(courseId.text, meetingDays.text, lectureInstructor.text, labId.text, labDays.text, labInstructor.text)
     else:
         
         course_title = driver.find_element(by=By.ID, value=courseTitleId)
@@ -187,7 +191,8 @@ def loopCourses(subject):
     firstIteration = True
 
     #makes all classes visible
-    all_classes_btn = driver.find_element(by=By.ID, value="PTS_BREADCRUMB_PTS_IMG$0")
+    all_classes_btn = wait.until(EC.visibility_of_element_located((By.ID, "PTS_BREADCRUMB_PTS_IMG$0")))
+    #all_classes_btn = driver.find_element(by=By.ID, value="PTS_BREADCRUMB_PTS_IMG$0")
     ActionChains(driver)\
         .click(all_classes_btn)\
         .perform()
@@ -203,7 +208,8 @@ def loopCourses(subject):
 
         #makes all classes visible, except in first iteration
         if not firstIteration:
-            all_classes_btn = driver.find_element(by=By.ID, value="PTS_BREADCRUMB_PTS_IMG$0")
+            all_classes_btn = wait.until(EC.visibility_of_element_located((By.ID, "PTS_BREADCRUMB_PTS_IMG$0")))
+            #all_classes_btn = driver.find_element(by=By.ID, value="PTS_BREADCRUMB_PTS_IMG$0")
             ActionChains(driver)\
                 .click(all_classes_btn)\
                 .perform()
@@ -217,11 +223,13 @@ def loopCourses(subject):
         try:
 
             #clicks specific course under a subject
-            course_to_click = driver.find_element(by=By.ID, value="PTS_LIST_TITLE$" + str(i))
+            course_to_click = wait.until(EC.visibility_of_element_located((By.ID, "PTS_LIST_TITLE$" + str(i))))
+            #course_to_click = driver.find_element(by=By.ID, value="PTS_LIST_TITLE$" + str(i))
             ActionChains(driver).click(course_to_click).perform()
             time.sleep(3)
 
-            course_title = driver.find_element(by=By.ID, value=courseTitleId)
+            course_title = wait.until(EC.visibility_of_element_located((By.ID, courseTitleId)))
+            #course_title = driver.find_element(by=By.ID, value=courseTitleId)
             print("course title: " + course_title.text)
 
             numRows = getNumRows()  # get the fresh number of rows for the new course
@@ -234,13 +242,15 @@ def loopCourses(subject):
 
                 course_obj = getCourseInfo(j, courseType)
 
+                time.sleep(3)
+
                 print("appending to child_obj_array")
                 create_child_obj(course_obj)
 
                 
             
 
-            create_parent_obj(course_title.text, courseType)
+            create_parent_obj(course_title.text, subject)
             #mongo_utils.child_obj_array.clear()  # puting it here returns empty arrays
 
 
@@ -266,8 +276,6 @@ def loopCourses(subject):
 
         
     #once all courses found, exits loop. uploads to db then goes to next subject.
-
-    upload_docs(subject)
 
     #After exiting while loop, signifies that all courses have been found for the given subject. Click back button to return to search page and start next subject
     back_btn = driver.find_element(by=By.ID, value="PT_WORK_PT_BUTTON_BACK")
@@ -326,17 +334,8 @@ def main(time=time):
         .click(fall_semester)\
         .perform()
     time.sleep(3)
-
     
     loopSubjects(subjects_array)
-
-    
-
-#tbody class="ps_grid-body"
-
-    
-
-
 
 main()
 
