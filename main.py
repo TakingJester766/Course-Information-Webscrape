@@ -13,6 +13,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
 
+import asyncio
 
 from subjects_array import subjects_array
 
@@ -57,7 +58,7 @@ if spire_pass == '' or spire_log == '' or search_start == '':
     sys.exit()
 
 
-#to have getCourseInformation return an object
+#to have getCourseInfo return an object
 class LectureOnly:
     def __init__(self, courseId, meetingDays, instructor):
         self.courseType = "lectureOnly"
@@ -75,6 +76,14 @@ class LectureAndLab:
         self.labId = labId
         self.labDays = labDays
         self.labInstructor = labInstructor
+
+#for writing to error log
+def writeErrorLog(course_title, subject, error):
+    error_log = open("error_log.txt", "a")
+    error_log.write("Error uploading " + course_title + " in " + subject + " to database.\nError: " + error + "\n")
+    error_log.write('-' * 30)
+    error_log.close()
+
 
 #getting number of sections in table after clicking on specific course
 def getNumRows():
@@ -160,7 +169,8 @@ def loopSubjects(subjects_array):
     for subject in subjects_array:
 
         #select additional ways to search button
-        additional_ways_to_search = driver.find_element(by=By.ID, value="SSR_CLSRCH_FLDS_PTS_ADV_SRCH")
+        additional_ways_to_search = wait.until(EC.visibility_of_element_located((By.ID, "SSR_CLSRCH_FLDS_PTS_ADV_SRCH")))
+        #additional_ways_to_search = driver.find_element(by=By.ID, value="SSR_CLSRCH_FLDS_PTS_ADV_SRCH")
         ActionChains(driver)\
             .click(additional_ways_to_search)\
             .perform()
@@ -168,21 +178,20 @@ def loopSubjects(subjects_array):
 
         driver.switch_to.frame(driver.find_element(by=By.ID, value="ptModFrame_0"))
 
-        dropdown = driver.find_element(by=By.ID, value="SSR_CLSRCH_ADV_SSR_ADVSRCH_OP2$0")
+        dropdown = wait.until(EC.visibility_of_element_located((By.ID, "SSR_CLSRCH_ADV_SSR_ADVSRCH_OP2$0")))
+        #dropdown = driver.find_element(by=By.ID, value="SSR_CLSRCH_ADV_SSR_ADVSRCH_OP2$0")
         select = Select(dropdown)
         print(subject)
         select.select_by_visible_text(subject)
 
-        search_btn = driver.find_element(by=By.ID, value="SSR_CLSRCH_FLDS_SSR_SEARCH_PB_1$0")
+
+        search_btn = wait.until(EC.visibility_of_element_located((By.ID, "SSR_CLSRCH_FLDS_SSR_SEARCH_PB_1$0")))
+        #search_btn = driver.find_element(by=By.ID, value="SSR_CLSRCH_FLDS_SSR_SEARCH_PB_1$0")
         ActionChains(driver)\
             .click(search_btn)\
             .perform()
         
-        time.sleep(3)
-
         loopCourses(subject)
-
-        time.sleep(3)
 
 def loopCourses(subject):
     
@@ -247,38 +256,40 @@ def loopCourses(subject):
                 print("appending to child_obj_array")
                 create_child_obj(course_obj)
 
-                
-            
-
-            create_parent_obj(course_title.text, subject)
-            #mongo_utils.child_obj_array.clear()  # puting it here returns empty arrays
-
-
-            foundCourses += 1  # increment foundCourses at the end of each successful iteration
-            i += 1  # increment i at the end of each successful iteration
-            
-
-            print("foundCourses: " + str(foundCourses) + "\n")
-            
-
-            driver.back()
             time.sleep(3)
 
-            
+            #will be used as a try/except for if a course is not found or can't upload. will write to error log if so, then go back to uploading courses.
+            try:
+                create_parent_obj(course_title.text, subject)
+                #mongo_utils.child_obj_array.clear()  # puting it here returns empty arrays
 
+
+                foundCourses += 1  # increment foundCourses at the end of each successful iteration
+                i += 1  # increment i at the end of each successful iteration
+                
+
+                print("foundCourses: " + str(foundCourses) + "\n")
+                
+
+                driver.back()
+                time.sleep(3)
+            except:
+                writeErrorLog(course_title.text, subject, "Error uploading course to database")
+                foundCourses += 1  # increment foundCourses, ended in error but still found and logged error for later
+                driver.back()
+                time.sleep(3)
+                continue
+                
         except NoSuchElementException:
             print("Element not found. Incrementing i by 1. i currently: " + str(i))
             i += 1  # increment i only in the exception, if a course was not found
             continue
 
-            
-
-
-        
     #once all courses found, exits loop. uploads to db then goes to next subject.
 
     #After exiting while loop, signifies that all courses have been found for the given subject. Click back button to return to search page and start next subject
-    back_btn = driver.find_element(by=By.ID, value="PT_WORK_PT_BUTTON_BACK")
+    back_btn = wait.until(EC.visibility_of_element_located((By.ID, "PT_WORK_PT_BUTTON_BACK")))
+    #back_btn = driver.find_element(by=By.ID, value="PT_WORK_PT_BUTTON_BACK")
     ActionChains(driver).click(back_btn).perform()
     time.sleep(3)
 
