@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-import json
+import asyncio
 
 from dotenv import load_dotenv, find_dotenv
 import os
@@ -39,7 +39,7 @@ def remove_duplicates(child_obj_array):
         return child_obj_array  # Return the original list if a syntax error occurs
 
 
-def create_child_obj(course_obj):
+async def create_child_obj(course_obj):
     global child_obj_array
     if course_obj.courseType == "lectureOnly":
 
@@ -74,7 +74,7 @@ def create_child_obj(course_obj):
     else:
         print("ERROR: Course type not found")
 
-def create_parent_obj(course_title, subject_name):
+async def create_parent_obj(course_title, subject_name):
     global child_obj_array
     global subjects
 

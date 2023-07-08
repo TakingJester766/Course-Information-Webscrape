@@ -168,6 +168,8 @@ def loopSubjects(subjects_array):
 
     for subject in subjects_array:
 
+        time.sleep(3)
+
         #select additional ways to search button
         additional_ways_to_search = wait.until(EC.visibility_of_element_located((By.ID, "SSR_CLSRCH_FLDS_PTS_ADV_SRCH")))
         #additional_ways_to_search = driver.find_element(by=By.ID, value="SSR_CLSRCH_FLDS_PTS_ADV_SRCH")
@@ -176,7 +178,8 @@ def loopSubjects(subjects_array):
             .perform()
         time.sleep(3)
 
-        driver.switch_to.frame(driver.find_element(by=By.ID, value="ptModFrame_0"))
+        wait.until(EC.frame_to_be_available_and_switch_to_it((By.ID, "ptModFrame_0")))
+        #driver.switch_to.frame(driver.find_element(by=By.ID, value="ptModFrame_0"))
 
         dropdown = wait.until(EC.visibility_of_element_located((By.ID, "SSR_CLSRCH_ADV_SSR_ADVSRCH_OP2$0")))
         #dropdown = driver.find_element(by=By.ID, value="SSR_CLSRCH_ADV_SSR_ADVSRCH_OP2$0")
@@ -195,7 +198,7 @@ def loopSubjects(subjects_array):
 
 def loopCourses(subject):
     
-    foundCourses = 0
+    foundCourses = 22
     i = 0
     firstIteration = True
 
@@ -254,13 +257,11 @@ def loopCourses(subject):
                 time.sleep(3)
 
                 print("appending to child_obj_array")
-                create_child_obj(course_obj)
-
-            time.sleep(3)
+                asyncio.run(create_child_obj(course_obj))
 
             #will be used as a try/except for if a course is not found or can't upload. will write to error log if so, then go back to uploading courses.
             try:
-                create_parent_obj(course_title.text, subject)
+                asyncio.run(create_parent_obj(course_title.text, subject))
                 #mongo_utils.child_obj_array.clear()  # puting it here returns empty arrays
 
 
