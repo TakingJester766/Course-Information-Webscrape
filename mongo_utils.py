@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-import bson
+import json
 
 from dotenv import load_dotenv, find_dotenv
 import os
@@ -27,7 +27,19 @@ child_obj_array = []
 
 #lecture_only_obj = LectureOnly("ACCOUNTG 371", "Class 75028: Lecture 01", "Monday Wednesday Friday 10:10AM to 11:00AM", "Sean Wandrei")
 
+
+#necessary to fix inconsistencies in the data coming from Spire
+def remove_duplicates(child_obj_array):
+    try:
+        temp_set = set(map(lambda x: str(x), child_obj_array))  # Convert dicts to strings and add to a set to remove duplicates
+        return list(map(lambda x: eval(x), temp_set))  # Convert strings back to dicts
+    except SyntaxError as e:
+        print(f"Encountered a syntax error when trying to evaluate a dictionary: {e}")
+        return child_obj_array  # Return the original list if a syntax error occurs
+
+
 def create_child_obj(course_obj):
+    global child_obj_array
     if course_obj.courseType == "lectureOnly":
         
         #print("CREATE CHILD OBJ")
@@ -41,6 +53,8 @@ def create_child_obj(course_obj):
             "lectureInstructor": course_obj.instructor
         }
         child_obj_array.append(course)
+        child_obj_array = remove_duplicates(child_obj_array)
+
         print("HERE IS THE CHILD COURSE OBJ: " + str(course) + "\n")
         print("HERE IS THE CHILD OBJ ARRAY: " + str(child_obj_array) + "\n")
     elif course_obj.courseType == "lectureLab":
@@ -53,6 +67,8 @@ def create_child_obj(course_obj):
             "labInstructor": course_obj.labInstructor
         }
         child_obj_array.append(course)
+        child_obj_array = remove_duplicates(child_obj_array)
+
         print("HERE IS THE CHILD COURSE OBJ: " + str(course) + "\n")
         print("HERE IS THE CHILD OBJ ARRAY: " + str(child_obj_array) + "\n")
     else:
@@ -96,43 +112,3 @@ def upload_docs(subject_name):
     
 
 
-'''
-create_child_obj("lectureOnly", lecture_only_obj)
-
-create_parent_obj("ACCOUNTG 371", "lectureOnly")
-
-upload_docs("Accounting")
-
-
-'''
-
-
-
-
-#it works!
-#upload_docs("Accounting", courses_array)
-
-"""
-
-{
-      "courseName": "ACCOUNTG 371",
-      "courseSections": [
-        {
-          "lectureSection": "Class 75028: Lecture 01",
-          "lectureTime": "Monday Wednesday Friday 10:10AM to 11:00AM",
-          "lectureInstructor": "Sean Wandrei"
-        }
-      ]
-    },
-    {
-      "courseName": "ACCOUNTG 396H",
-      "courseSections": [
-        {
-          "lectureSection": "Class 1000: Lecture 01",
-          "lectureTime": "Monday Friday 10:10AM to 11:00AM",
-          "lectureInstructor": "Jericho Albricht"
-        }
-      ]
-    }
-
-"""
