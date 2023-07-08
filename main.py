@@ -182,12 +182,9 @@ def loopSubjects(subjects_array):
 
 def loopCourses(subject):
     
-    foundCourses = 20
+    foundCourses = 0
     i = 0
     firstIteration = True
-
-    #courses_array = [] # this will hold all information for a given subject
-    #child_obj_array = []  # reset child_obj_array for each new course
 
     #makes all classes visible
     all_classes_btn = driver.find_element(by=By.ID, value="PTS_BREADCRUMB_PTS_IMG$0")
@@ -249,6 +246,7 @@ def loopCourses(subject):
 
             foundCourses += 1  # increment foundCourses at the end of each successful iteration
             i += 1  # increment i at the end of each successful iteration
+            
 
             print("foundCourses: " + str(foundCourses) + "\n")
             

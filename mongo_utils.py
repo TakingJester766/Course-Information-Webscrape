@@ -30,10 +30,10 @@ child_obj_array = []
 def create_child_obj(course_obj):
     if course_obj.courseType == "lectureOnly":
         
-        print("CREATE CHILD OBJ")
-        print(course_obj.courseId)
-        print(course_obj.meetingDays)
-        print(course_obj.instructor)
+        #print("CREATE CHILD OBJ")
+        #print(course_obj.courseId)
+        #print(course_obj.meetingDays)
+        #print(course_obj.instructor)
 
         course = {
             "lectureSection": course_obj.courseId,
@@ -41,6 +41,8 @@ def create_child_obj(course_obj):
             "lectureInstructor": course_obj.instructor
         }
         child_obj_array.append(course)
+        print("HERE IS THE CHILD COURSE OBJ: " + str(course) + "\n")
+        print("HERE IS THE CHILD OBJ ARRAY: " + str(child_obj_array) + "\n")
     elif course_obj.courseType == "lectureLab":
         course = {
             "lectureSection": course_obj.courseId,
@@ -51,40 +53,47 @@ def create_child_obj(course_obj):
             "labInstructor": course_obj.labInstructor
         }
         child_obj_array.append(course)
+        print("HERE IS THE CHILD COURSE OBJ: " + str(course) + "\n")
+        print("HERE IS THE CHILD OBJ ARRAY: " + str(child_obj_array) + "\n")
     else:
         print("ERROR: Course type not found")
 
 
 def create_parent_obj(course_title, course_type):
-    print(child_obj_array)
+    #print(child_obj_array)
     if course_type == "lectureOnly":
         course = {
             "courseName": course_title,
             "courseSections": [
-                child_obj_array
+                list(child_obj_array)
             ]
         }
-        print(course)
+        print("HERE IS THE PARENT COURSE OBJ: " + str(course) + "\n")
         courses_array.append(course)
     else:
         course = {
             "courseName": course_title,
             "courseSections": [
-                child_obj_array
+                list(child_obj_array)
             ]
         }
-        print(course)
+        print("HERE IS THE PARENT COURSE OBJ: " + str(course) + "\n")
         courses_array.append(course)
+    child_obj_array.clear()
     
 
 
 def upload_docs(subject_name):
+    print("COURSES ARRAY CONTENTS: " + str(courses_array) + "\n")
     subjectDocument = {
         "subjectName": subject_name,
         "subjectCourses": courses_array
     }
 
     subjects.insert_one(subjectDocument)
+    print("Success, clearning courses array")
+    courses_array.clear()
+    
 
 
 '''
