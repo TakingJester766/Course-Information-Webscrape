@@ -1,21 +1,21 @@
 '''
 Found subjects:
 'Accounting', 'Aerospace Studies', 'Afro-American Studies','Animal Science', 'Arabic', 'Architecture', 'Art History', 'Arts Extension',  'Asian Studies', 'Biochemistry & Molecular Bio.','Biomedical Engineering', 'Biostatistics', 
- 'Building & Construction Tech', 'Catalan', 'Civil & Environmental Engrg', 'Classics','College of Inform & Comp Sci', 'Communication', 
+ 'Building & Construction Tech', 'Catalan', 'Civil & Environmental Engrg', 'Classics','College of Inform & Comp Sci', 'Communication', 'Anthropology', 
 'Communication Disorders', 'Comparative Literature', 
 
 
 Issue subjects:
-'Anthropology', 'Art', 'Astronomy', "Bachelor's Deg. W/Indiv Conc.", 'Biology', 'Chemical Engineering','Chemistry', 'Chinese', 
+'Art', 'Astronomy', "Bachelor's Deg. W/Indiv Conc.", 'Biology', 'Chemical Engineering','Chemistry', 'Chinese', 'Astronomy', "Bachelor's Deg. W/Indiv Conc.", "Anthropology"
 
 Not found subjects:
-'Anthropology - @Amherst', 'Asian - @Amherst', 'Astronomy - @Amherst', 'Astronomy - @Mt Holyoke', 'Astronomy - @Smith', 'Biology - @Amherst', 'Black Studies - @Amherst',
+'Anthropology - @Amherst', 'Asian - @Amherst', 'Astronomy - @Amherst', 'Astronomy - @Mt Holyoke', 'Astronomy - @Smith', 'Biology - @Amherst', 'Black Studies - @Amherst', 'Critical Social Inq - @Hamp', 'Dance - @Mt Holyoke', 'Dance - @Smith', 
 
 
 '''
 
 
-subjects_array = ['Computer Science', 'Critical Social Inq - @Hamp', 'Dance', 'Dance - @Mt Holyoke', 'Dance - @Smith', 
+subjects_array = ['Biology', 'Chemical Engineering','Chemistry', 'Chinese', 'Computer Science', 'Dance', 
 'Data Analytics and Computation', 'East Asian Literature - @Smith', 'Economics', 
 'Economics - @Smith', 'Education', 'Electrical & Computer Engin', 'Engineering', 
 'English', 'English - @Amherst', 'English Lang.& Lit. - @Smith', 

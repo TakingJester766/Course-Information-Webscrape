@@ -36,9 +36,13 @@ courseTitleId = "SSR_CRSE_INFO_V_SSS_SUBJ_CATLG"
 
 #can assume that lecture and discussions/labs are all inside span tags
 
+
 lectureId = "SSR_CLSRCH_F_WK_SSR_CMPNT_DESCR_1$294$$"
 lectureMeetingTime = "SSR_CLSRCH_F_WK_SSR_MTG_SCHED_L_1$134$$"
 lectureInstructorId  = "SSR_CLSRCH_F_WK_SSR_INSTR_LONG_1$86$$"
+
+search_id_reg = "PTS_LIST_TITLE$"
+search_id_wind = "win8divPTS_LIST_TITLE$"
 
 
 #discussion and lab query ids are the same
@@ -47,7 +51,7 @@ discussionOrLabMeetingTime = "SSR_CLSRCH_F_WK_SSR_MTG_SCHED_L_2$135$$"
 discussionOrLabInstructor = "SSR_CLSRCH_F_WK_SSR_INSTR_LONG_2$161$$"
 
 #wait for element to load
-timeout = 10
+timeout = 20
 wait = WebDriverWait(driver, timeout)
 
 
@@ -220,13 +224,17 @@ def loopCourses(subject):
     i = 0
     firstIteration = True
 
-    #makes all classes visible
-    all_classes_btn = wait.until(EC.visibility_of_element_located((By.ID, "PTS_BREADCRUMB_PTS_IMG$0")))
-    #all_classes_btn = driver.find_element(by=By.ID, value="PTS_BREADCRUMB_PTS_IMG$0")
-    ActionChains(driver)\
-        .click(all_classes_btn)\
-        .perform()
-    time.sleep(3)
+    try:
+        #makes all classes visible
+        all_classes_btn = wait.until(EC.visibility_of_element_located((By.ID, "PTS_BREADCRUMB_PTS_IMG$0")))
+        #all_classes_btn = driver.find_element(by=By.ID, value="PTS_BREADCRUMB_PTS_IMG$0")
+        ActionChains(driver)\
+            .click(all_classes_btn)\
+            .perform()
+        time.sleep(3)
+    except (NoSuchElementException, TimeoutException, StaleElementReferenceException) as e:
+        print("All classes button not found. Continuing to next step.\n")
+        pass
     
     numCourses = getNumCourses()
     print("Number of courses: " + str(numCourses))    
@@ -236,19 +244,7 @@ def loopCourses(subject):
 
         #mongo_utils.child_obj_array.clear()  # Reset child_obj_array for each new course
 
-        #makes all classes visible, except in first iteration
-        if not firstIteration:
-            all_classes_btn = wait.until(EC.visibility_of_element_located((By.ID, "PTS_BREADCRUMB_PTS_IMG$0")))
-            #all_classes_btn = driver.find_element(by=By.ID, value="PTS_BREADCRUMB_PTS_IMG$0")
-            ActionChains(driver)\
-                .click(all_classes_btn)\
-                .perform()
-            
-            time.sleep(3)
-        else:
-            
-            firstIteration = False
-            time.sleep(3)
+        
 
         if check_no_results():
             print("No results found for this subject. Continuing to next subject.")
@@ -256,24 +252,65 @@ def loopCourses(subject):
         else:
             print("Results found for this subject. Continuing to next step.")
 
+
+
+        try:
+            if not firstIteration:
+                all_classes_btn = wait.until(EC.visibility_of_element_located((By.ID, "PTS_BREADCRUMB_PTS_IMG$0")))
+                #all_classes_btn = driver.find_element(by=By.ID, value="PTS_BREADCRUMB_PTS_IMG$0")
+                ActionChains(driver)\
+                    .click(all_classes_btn)\
+                    .perform()
+                
+                time.sleep(3)
+            else:
+                firstIteration = False
+                time.sleep(3)
+        except (NoSuchElementException, TimeoutException) as e:
+            print("All classes button not found. Continuing to next step.")
+
         try:
 
             
+            time.sleep(3)
+            
+            course_reg = driver.find_elements(by=By.ID, value=search_id_reg + str(i))
+            course_wind = driver.find_elements(by=By.ID, value=search_id_wind + str(i))
+
+            if (len(course_reg) > 0):
+                course_to_click = wait.until(EC.visibility_of_element_located((By.ID, search_id_reg + str(i))))
+                #course_to_click = driver.find_element(by=By.ID, value=search_id_reg + str(i))
+                ActionChains(driver).click(course_to_click).perform()
+            elif (len(course_wind) > 0):
+                course_to_click = wait.until(EC.visibility_of_element_located((By.ID, search_id_wind + str(i))))
+                #course_to_click = driver.find_element(by=By.ID, value=search_id_wind + str(i))
+                ActionChains(driver).click(course_to_click).perform()
+            else:
+                #throw exception to increment i and continue
+                raise NoSuchElementException
+            
+            
+            '''
             try:
                 #clicks specific course under a subject
                 course_to_click = wait.until(EC.visibility_of_element_located((By.ID, "PTS_LIST_TITLE$" + str(i))))
                 #course_to_click = driver.find_element(by=By.ID, value="PTS_LIST_TITLE$" + str(i))
                 ActionChains(driver).click(course_to_click).perform()
-                time.sleep(3)
-            except:
+            except (NoSuchElementException, TimeoutException, StaleElementReferenceException) as e:
                 #clicks specific course under a subject
+                print("Cycle to wind8div format for searching courses")
+                print("i: " + str(i) + "\n")
                 course_to_click = wait.until(EC.visibility_of_element_located((By.ID, "win8divPTS_LIST_TITLE$" + str(i))))
                 #course_to_click = driver.find_element(by=By.ID, value="PTS_LIST_TITLE$" + str(i))
                 ActionChains(driver).click(course_to_click).perform()
-                time.sleep(3)
+                pass
+            '''
 
             course_title = wait.until(EC.visibility_of_element_located((By.ID, courseTitleId)))
             textTitle = course_title.text
+            
+            #need to wait for first element to appear also
+            wait.until(EC.visibility_of_element_located((By.ID, lectureId + "0")))
 
             #course_title = driver.find_element(by=By.ID, value=courseTitleId)
             print("course title: " + textTitle)
@@ -283,9 +320,12 @@ def loopCourses(subject):
             courseType = classifyCourseType()
             print("Course type: " + str(courseType) + "\n")
 
+            #need to wait for first element to appear also
+            wait.until(EC.visibility_of_element_located((By.ID, lectureId + "0")))
+
             for j in range(0, numRows):
                 print("getting course information for row: " + str(j) + "\n")
-
+                
                 course_obj = getCourseInfo(j, courseType)
 
                 time.sleep(3)
@@ -317,13 +357,13 @@ def loopCourses(subject):
                 
         except (NoSuchElementException, TimeoutException, StaleElementReferenceException) as e:
 
-            if (i < numCourses + 3):
+            if (i < numCourses ):
 
-                print("Element not found. Incrementing i by 1. i currently: " + str(i))
+                print("i SKIPPED AT " + str(i) + "\n")
                 i += 1  # increment i only in the exception, if a course was not found
                 continue
             else:
-                print("By error, i has exceeded the number of courses. Exiting loop.")
+                print("By error, " + subject + "search i has exceeded the number of courses. Exiting loop.")
                 break
 
     #once all courses found, exits loop. uploads to db then goes to next subject.
@@ -333,6 +373,7 @@ def loopCourses(subject):
     #back_btn = driver.find_element(by=By.ID, value="PT_WORK_PT_BUTTON_BACK")
     ActionChains(driver).click(back_btn).perform()
     time.sleep(3)
+
 
 # MAIN METHOD, RUNS EVERYTHING
 def main(time=time):    
