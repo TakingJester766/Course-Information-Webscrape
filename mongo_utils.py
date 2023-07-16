@@ -86,6 +86,7 @@ async def create_parent_obj(course_title, subject_name):
     # Insert/Update the course into the MongoDB collection
     subjects.update_one({"subjectName": subject_name}, {"$push": {"subjectCourses": course}}, upsert=True)
     child_obj_array.clear()
+    print("Uploaded and child array cleared")
     
 
 '''

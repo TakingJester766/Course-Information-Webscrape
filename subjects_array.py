@@ -1,20 +1,21 @@
 '''
-Found courses:
-'Accounting', 'Aerospace Studies', 
+Found subjects:
+'Accounting', 'Aerospace Studies', 'Afro-American Studies','Animal Science', 'Arabic', 'Architecture', 'Art History', 'Arts Extension',  'Asian Studies', 'Biochemistry & Molecular Bio.','Biomedical Engineering', 'Biostatistics', 
+ 'Building & Construction Tech', 'Catalan', 'Civil & Environmental Engrg', 'Classics','College of Inform & Comp Sci', 'Communication', 
+'Communication Disorders', 'Comparative Literature', 
+
+
+Issue subjects:
+'Anthropology', 'Art', 'Astronomy', "Bachelor's Deg. W/Indiv Conc.", 'Biology', 'Chemical Engineering','Chemistry', 'Chinese', 
+
+Not found subjects:
+'Anthropology - @Amherst', 'Asian - @Amherst', 'Astronomy - @Amherst', 'Astronomy - @Mt Holyoke', 'Astronomy - @Smith', 'Biology - @Amherst', 'Black Studies - @Amherst',
+
+
 '''
 
-subjects_array = [
-'Afro-American Studies', 'Animal Science', 
-'Anthropology', 'Anthropology - @Amherst', 'Arabic', 'Architecture', 'Art', 
-'Art History', 'Arts Extension', 'Asian - @Amherst', 'Asian Studies', 'Astronomy', 
-'Astronomy - @Amherst', 'Astronomy - @Mt Holyoke', 'Astronomy - @Smith', 
-"Bachelor's Deg. W/Indiv Conc.", 'Biochemistry & Molecular Bio.', 'Biology', 
-'Biology - @Amherst', 'Biomedical Engineering', 'Biostatistics', 
-'Black Studies - @Amherst', 'Building & Construction Tech', 'Catalan', 
-'Chemical Engineering', 'Chemistry', 'Chinese', 'Civil & Environmental Engrg', 
-'Classics', 'College of Inform & Comp Sci', 'Communication', 
-'Communication Disorders', 'Comparative Literature', 'Computer Science', 
-'Critical Social Inq - @Hamp', 'Dance', 'Dance - @Mt Holyoke', 'Dance - @Smith', 
+
+subjects_array = ['Computer Science', 'Critical Social Inq - @Hamp', 'Dance', 'Dance - @Mt Holyoke', 'Dance - @Smith', 
 'Data Analytics and Computation', 'East Asian Literature - @Smith', 'Economics', 
 'Economics - @Smith', 'Education', 'Electrical & Computer Engin', 'Engineering', 
 'English', 'English - @Amherst', 'English Lang.& Lit. - @Smith', 

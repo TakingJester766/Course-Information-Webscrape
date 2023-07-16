@@ -11,7 +11,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, StaleElementReferenceException
 
 import asyncio
 
@@ -78,10 +78,13 @@ class LectureAndLab:
 
 #for writing to error log
 def writeErrorLog(course_title, subject, error):
-    error_log = open("error_log.txt", "a")
-    error_log.write("Error uploading " + course_title + " in " + subject + " to database.\nError: " + error + "\n")
-    error_log.write('-' * 30)
-    error_log.close()
+    try:
+        with open("error_log.txt", "a") as error_log:
+            error_log.write(f"Error uploading {course_title} in {subject} to database.\nError: {error}\n")
+            error_log.write('-' * 30 + "\n")
+    except Exception as e:
+        print(f"An error occurred while writing to the error log: {e}")
+
 
 
 #getting number of sections in table after clicking on specific course
@@ -111,6 +114,22 @@ def classifyCourseType():
         return "lectureLab"
     else:
         return "lecture"
+    
+#checks if no courses are present in a given subject
+def check_no_results():
+    try:
+        # Find the element by its ID
+        no_results_element = driver.find_element(by=By.ID, value="PTS_SRCH_PTS_INDEXTIME")
+
+        # Check if the element's text is the "No results" message
+        if no_results_element.text == "No results were returned. Refine your search by entering a different keyword.":
+            return True
+        else:
+            print("Results present.\n")
+            return False
+    except NoSuchElementException:
+        # If the element wasn't found, return False
+        return False
 
 
 def getCourseInfo(row, courseType):
@@ -231,14 +250,27 @@ def loopCourses(subject):
             firstIteration = False
             time.sleep(3)
 
+        if check_no_results():
+            print("No results found for this subject. Continuing to next subject.")
+            break
+        else:
+            print("Results found for this subject. Continuing to next step.")
 
         try:
 
-            #clicks specific course under a subject
-            course_to_click = wait.until(EC.visibility_of_element_located((By.ID, "PTS_LIST_TITLE$" + str(i))))
-            #course_to_click = driver.find_element(by=By.ID, value="PTS_LIST_TITLE$" + str(i))
-            ActionChains(driver).click(course_to_click).perform()
-            time.sleep(3)
+            
+            try:
+                #clicks specific course under a subject
+                course_to_click = wait.until(EC.visibility_of_element_located((By.ID, "PTS_LIST_TITLE$" + str(i))))
+                #course_to_click = driver.find_element(by=By.ID, value="PTS_LIST_TITLE$" + str(i))
+                ActionChains(driver).click(course_to_click).perform()
+                time.sleep(3)
+            except:
+                #clicks specific course under a subject
+                course_to_click = wait.until(EC.visibility_of_element_located((By.ID, "win8divPTS_LIST_TITLE$" + str(i))))
+                #course_to_click = driver.find_element(by=By.ID, value="PTS_LIST_TITLE$" + str(i))
+                ActionChains(driver).click(course_to_click).perform()
+                time.sleep(3)
 
             course_title = wait.until(EC.visibility_of_element_located((By.ID, courseTitleId)))
             textTitle = course_title.text
@@ -283,10 +315,16 @@ def loopCourses(subject):
                 time.sleep(3)
                 continue
                 
-        except NoSuchElementException:
-            print("Element not found. Incrementing i by 1. i currently: " + str(i))
-            i += 1  # increment i only in the exception, if a course was not found
-            continue
+        except (NoSuchElementException, TimeoutException, StaleElementReferenceException) as e:
+
+            if (i < numCourses + 3):
+
+                print("Element not found. Incrementing i by 1. i currently: " + str(i))
+                i += 1  # increment i only in the exception, if a course was not found
+                continue
+            else:
+                print("By error, i has exceeded the number of courses. Exiting loop.")
+                break
 
     #once all courses found, exits loop. uploads to db then goes to next subject.
 
