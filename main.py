@@ -242,18 +242,6 @@ def loopCourses(subject):
 
     while foundCourses < numCourses:
 
-        #mongo_utils.child_obj_array.clear()  # Reset child_obj_array for each new course
-
-        
-
-        if check_no_results():
-            print("No results found for this subject. Continuing to next subject.")
-            break
-        else:
-            print("Results found for this subject. Continuing to next step.")
-
-
-
         try:
             if not firstIteration:
                 all_classes_btn = wait.until(EC.visibility_of_element_located((By.ID, "PTS_BREADCRUMB_PTS_IMG$0")))
@@ -288,23 +276,6 @@ def loopCourses(subject):
             else:
                 #throw exception to increment i and continue
                 raise NoSuchElementException
-            
-            
-            '''
-            try:
-                #clicks specific course under a subject
-                course_to_click = wait.until(EC.visibility_of_element_located((By.ID, "PTS_LIST_TITLE$" + str(i))))
-                #course_to_click = driver.find_element(by=By.ID, value="PTS_LIST_TITLE$" + str(i))
-                ActionChains(driver).click(course_to_click).perform()
-            except (NoSuchElementException, TimeoutException, StaleElementReferenceException) as e:
-                #clicks specific course under a subject
-                print("Cycle to wind8div format for searching courses")
-                print("i: " + str(i) + "\n")
-                course_to_click = wait.until(EC.visibility_of_element_located((By.ID, "win8divPTS_LIST_TITLE$" + str(i))))
-                #course_to_click = driver.find_element(by=By.ID, value="PTS_LIST_TITLE$" + str(i))
-                ActionChains(driver).click(course_to_click).perform()
-                pass
-            '''
 
             course_title = wait.until(EC.visibility_of_element_located((By.ID, courseTitleId)))
             textTitle = course_title.text
@@ -324,19 +295,24 @@ def loopCourses(subject):
             wait.until(EC.visibility_of_element_located((By.ID, lectureId + "0")))
 
             for j in range(0, numRows):
-                print("getting course information for row: " + str(j) + "\n")
+
+                try:
+                    print("getting course information for row: " + str(j) + "\n")
+                    
+                    course_obj = getCourseInfo(j, courseType)
+
+                    time.sleep(3)
+
+                    asyncio.run(create_child_obj(course_obj))
+                except (NoSuchElementException, TimeoutException, StaleElementReferenceException) as e:
+                    print("Error getting course info for row: " + str(j) + "\n")
+                    continue
                 
-                course_obj = getCourseInfo(j, courseType)
-
-                time.sleep(3)
-
-                print("appending to child_obj_array")
-                asyncio.run(create_child_obj(course_obj))
 
             #will be used as a try/except for if a course is not found or can't upload. will write to error log if so, then go back to uploading courses.
             try:
                 asyncio.run(create_parent_obj(textTitle, subject))
-                #mongo_utils.child_obj_array.clear()  # puting it here returns empty arrays
+                #mongo_utils.child_obj_array.clear()  # putting it here returns empty arrays
 
 
                 foundCourses += 1  # increment foundCourses at the end of each successful iteration
@@ -349,21 +325,21 @@ def loopCourses(subject):
                 driver.back()
                 time.sleep(3)
             except:
-                writeErrorLog(course_title, subject, "Error uploading course to database")
-                foundCourses += 1  # increment foundCourses, ended in error but still found and logged error for later
+                print("Error uploading to db\n")
+                foundCourses += 1
                 driver.back()
                 time.sleep(3)
                 continue
                 
         except (NoSuchElementException, TimeoutException, StaleElementReferenceException) as e:
 
-            if (i < numCourses ):
+            if (i < numCourses + 4):
 
                 print("i SKIPPED AT " + str(i) + "\n")
                 i += 1  # increment i only in the exception, if a course was not found
                 continue
             else:
-                print("By error, " + subject + "search i has exceeded the number of courses. Exiting loop.")
+                print("i surpassed numCourses + 4, exiting subject " + subject + "\n")
                 break
 
     #once all courses found, exits loop. uploads to db then goes to next subject.
