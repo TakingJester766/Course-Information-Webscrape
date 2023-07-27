@@ -223,6 +223,7 @@ def loopCourses(subject):
     foundCourses = 0
     i = 0
     firstIteration = True
+    missed_courses = 0
 
     try:
         #makes all classes visible
@@ -239,6 +240,9 @@ def loopCourses(subject):
     numCourses = getNumCourses()
     print("Number of courses: " + str(numCourses))    
     
+    missed_course_buffer = round(numCourses * 0.25)
+
+    print("Missed course buffer: " + str(missed_course_buffer) + "\n")
 
     while foundCourses < numCourses:
 
@@ -289,7 +293,7 @@ def loopCourses(subject):
             numRows = getNumRows()  # get the fresh number of rows for the new course
 
             courseType = classifyCourseType()
-            print("Course type: " + str(courseType) + "\n")
+            #print("Course type: " + str(courseType) + "\n")
 
             #need to wait for first element to appear also
             wait.until(EC.visibility_of_element_located((By.ID, lectureId + "0")))
@@ -297,7 +301,7 @@ def loopCourses(subject):
             for j in range(0, numRows):
 
                 try:
-                    print("getting course information for row: " + str(j) + "\n")
+                    #print("getting course information for row: " + str(j) + "\n")
                     
                     course_obj = getCourseInfo(j, courseType)
 
@@ -319,7 +323,7 @@ def loopCourses(subject):
                 i += 1  # increment i at the end of each successful iteration
                 
 
-                print("foundCourses: " + str(foundCourses) + "\n")
+                print("foundCourses: " + str(foundCourses) + "\ni: " + str(i) + "\n")
                 
 
                 driver.back()
@@ -333,13 +337,14 @@ def loopCourses(subject):
                 
         except (NoSuchElementException, TimeoutException, StaleElementReferenceException) as e:
 
-            if (i < numCourses + 4):
+            if (i < numCourses + missed_course_buffer):
 
                 print("i SKIPPED AT " + str(i) + "\n")
                 i += 1  # increment i only in the exception, if a course was not found
+                missed_courses += 1
                 continue
             else:
-                print("i surpassed numCourses + 4, exiting subject " + subject + "\n")
+                print("i surpassed numCourses + buffer, exiting subject " + subject + "\n")
                 break
 
     #once all courses found, exits loop. uploads to db then goes to next subject.
