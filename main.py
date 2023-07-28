@@ -220,8 +220,8 @@ def loopSubjects(subjects_array):
 
 def loopCourses(subject):
     
-    foundCourses = 0
-    i = 0
+    foundCourses = 4
+    i = 9
     firstIteration = True
     missed_courses = 0
 

@@ -1,5 +1,4 @@
 from pymongo import MongoClient
-import asyncio
 
 from dotenv import load_dotenv, find_dotenv
 import os

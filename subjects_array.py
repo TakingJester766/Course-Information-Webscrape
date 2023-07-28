@@ -35,5 +35,5 @@ Not found subjects:
 
 '''
 
-subjects_array = ['Public Health']
+subjects_array = ['History']
 
