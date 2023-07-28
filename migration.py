@@ -23,32 +23,28 @@ firebase_admin.initialize_app(cred)
 
 db = firestore.client()
 
-def export_subject_to_firestore(subject_name):
-    subject = subjects.find_one({"subjectName": subject_name})
+def export_subject_to_firestore(subject):
+    # MongoDB uses ObjectId for _id which is not JSON serializable,
+    # we need to convert it to string before we can dump to JSON
+    subject["_id"] = str(subject["_id"])
 
-    if subject:
-        # MongoDB uses ObjectId for _id which is not JSON serializable,
-        # we need to convert it to string before we can dump to JSON
-        subject["_id"] = str(subject["_id"])
+    # Convert subject dictionary to Firestore acceptable format
+    firestore_subject = json.loads(dumps(subject))
 
-        # Convert subject dictionary to Firestore acceptable format
-        firestore_subject = json.loads(dumps(subject))
+    # Remove _id field from firestore_subject
+    del firestore_subject["_id"]
 
-        # Remove _id field from firestore_subject
-        del firestore_subject["_id"]
-
-        # Add a new doc in collection 'courses' with ID of subjectName
-        db.collection('courses').document(firestore_subject["subjectName"]).set(firestore_subject)
-        
-        print(f"Exported {subject_name} to Firestore.")
-        
-    else:
-        print(f"No document found for subject: {subject_name}")
+    # Add a new doc in collection 'courses' with ID of subjectName
+    db.collection('course_index').document(firestore_subject["subjectName"]).set(firestore_subject)
+    
+    print(f"Exported {firestore_subject['subjectName']} to Firestore.")
 
 
-def update_sections_in_firestore(subject_name):
+def update_sections_in_firestore(subject):
+    subject_name = subject['subjectName']
+
     # Retrieve the document
-    doc_ref = db.collection('courses').document(subject_name)
+    doc_ref = db.collection('courses_index').document(subject_name)
     doc = doc_ref.get()
     
     if doc.exists:
@@ -63,8 +59,10 @@ def update_sections_in_firestore(subject_name):
         doc_ref.set(firestore_subject)
         
         print(f"Updated {subject_name} in Firestore.")
-    else:
-        print(f"No document found for subject: {subject_name}")
 
-export_subject_to_firestore("Accounting")
-update_sections_in_firestore("Accounting")
+
+# Iterate over all subjects in MongoDB
+for subject in subjects.find():
+    export_subject_to_firestore(subject)
+    update_sections_in_firestore(subject)
+
