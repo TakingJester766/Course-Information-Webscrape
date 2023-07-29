@@ -34,7 +34,7 @@ def export_subject_to_firestore(subject):
     # Remove _id field from firestore_subject
     del firestore_subject["_id"]
 
-    # Add a new doc in collection 'courses' with ID of subjectName
+    # Add a new doc in collection 'course_index' with ID of subjectName
     db.collection('course_index').document(firestore_subject["subjectName"]).set(firestore_subject)
     
     print(f"Exported {firestore_subject['subjectName']} to Firestore.")
@@ -44,7 +44,7 @@ def update_sections_in_firestore(subject):
     subject_name = subject['subjectName']
 
     # Retrieve the document
-    doc_ref = db.collection('courses_index').document(subject_name)
+    doc_ref = db.collection('course_index').document(subject_name)
     doc = doc_ref.get()
     
     if doc.exists:
@@ -66,3 +66,6 @@ for subject in subjects.find():
     export_subject_to_firestore(subject)
     update_sections_in_firestore(subject)
 
+
+export_subject_to_firestore("Accounting")
+update_sections_in_firestore("Accounting")
