@@ -34,10 +34,13 @@ def export_subject_to_firestore(subject):
     # Remove _id field from firestore_subject
     del firestore_subject["_id"]
 
+    # Save the subjectName in a variable and remove it from the dictionary
+    subject_name = firestore_subject.pop("subjectName")
+
     # Add a new doc in collection 'course_index' with ID of subjectName
-    db.collection('course_index').document(firestore_subject["subjectName"]).set(firestore_subject)
+    db.collection('course_index').document(subject_name).set(firestore_subject)
     
-    print(f"Exported {firestore_subject['subjectName']} to Firestore.")
+    print(f"Exported {subject_name} to Firestore.")
 
 
 def update_sections_in_firestore(subject):
@@ -60,12 +63,14 @@ def update_sections_in_firestore(subject):
         
         print(f"Updated {subject_name} in Firestore.")
 
-
 # Iterate over all subjects in MongoDB
 for subject in subjects.find():
     export_subject_to_firestore(subject)
     update_sections_in_firestore(subject)
 
+def count_documents_in_collection(collection_name):
+    docs = db.collection(collection_name).stream()
+    return len(list(docs))
 
-export_subject_to_firestore("Accounting")
-update_sections_in_firestore("Accounting")
+# Example usage:
+print(count_documents_in_collection('course_index'))
